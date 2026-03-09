@@ -10,18 +10,9 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 /**
- * AiAffiliate Browser — Background Engine
- * 
- * Runs the extension's background.js (service worker logic) in a hidden
- * WebView.
- * This WebView is never shown to the user — it only executes JavaScript.
- * 
- * Flow:
- * 1. Creates hidden WebView with JS enabled
- * 2. Injects chrome-api-shim.js
- * 3. Injects background.js
- * 4. Messages are routed between content WebView ←→ background WebView
- * via ExtensionBridge
+ * AiAffiliate Browser — Background Engine v2
+ * Runs background.js in a hidden WebView.
+ * Fires onInstalled/onStartup after scripts load.
  */
 public class BackgroundEngine {
 
@@ -36,36 +27,35 @@ public class BackgroundEngine {
         this.bridge = bridge;
     }
 
-    /**
-     * Initialize the background engine.
-     * Must be called on the UI thread.
-     */
-    @SuppressLint({ "SetJavaScriptEnabled", "JavascriptInterface" })
+    @SuppressLint({"SetJavaScriptEnabled", "JavascriptInterface"})
     public void initialize() {
         bgWebView = new WebView(context);
 
-        // Configure WebView for background execution
         WebSettings settings = bgWebView.getSettings();
         settings.setJavaScriptEnabled(true);
         settings.setDomStorageEnabled(true);
         settings.setDatabaseEnabled(true);
         settings.setAllowFileAccess(true);
         settings.setAllowContentAccess(true);
+        settings.setAllowFileAccessFromFileURLs(true);
+        settings.setAllowUniversalAccessFromFileURLs(true);
+        // Allow network for license checks, API calls
+        settings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
 
-        // Register the bridge
         bgWebView.addJavascriptInterface(bridge, "aabBridge");
         bridge.setBackgroundWebView(bgWebView);
 
-        // Console logging for debugging
         bgWebView.setWebChromeClient(new WebChromeClient() {
             @Override
             public boolean onConsoleMessage(ConsoleMessage cm) {
-                Log.d(TAG, "[BG] " + cm.message() + " (" + cm.sourceId() + ":" + cm.lineNumber() + ")");
+                String level = cm.messageLevel() == ConsoleMessage.MessageLevel.ERROR ? "E" :
+                               cm.messageLevel() == ConsoleMessage.MessageLevel.WARNING ? "W" : "D";
+                Log.println(level.equals("E") ? Log.ERROR : level.equals("W") ? Log.WARN : Log.DEBUG,
+                    TAG, "[BG] " + cm.message());
                 return true;
             }
         });
 
-        // Load a blank page, then inject scripts
         bgWebView.setWebViewClient(new WebViewClient() {
             @Override
             public void onPageFinished(WebView view, String url) {
@@ -76,44 +66,30 @@ public class BackgroundEngine {
             }
         });
 
-        // Load empty HTML as base for the background context
         bgWebView.loadData(
-                "<!DOCTYPE html><html><head><title>BG Engine</title></head><body></body></html>",
-                "text/html", "UTF-8");
+            "<!DOCTYPE html><html><head><title>BG</title></head><body></body></html>",
+            "text/html", "UTF-8");
 
-        Log.i(TAG, "Background engine initialized");
+        Log.i(TAG, "Background engine initializing...");
     }
 
-    /**
-     * Inject the Chrome API shim and then background.js
-     */
     private void loadBackgroundScripts() {
-        // 1. Inject Chrome API shim first
+        // 1. Chrome API shim
         bridge.injectAssetScript(bgWebView, "extension/chrome-api-shim.js");
 
-        // 2. Inject background.js
+        // 2. Background script
         bridge.injectAssetScript(bgWebView, "extension/background.js");
 
-        Log.i(TAG, "Background scripts loaded ✅");
+        // 3. Fire lifecycle events
+        bridge.fireOnInstalled();
+        bridge.fireOnStartup();
+
+        Log.i(TAG, "Background scripts loaded + lifecycle events fired ✅");
     }
 
-    /**
-     * Get the background WebView (for routing messages)
-     */
-    public WebView getWebView() {
-        return bgWebView;
-    }
+    public WebView getWebView() { return bgWebView; }
+    public boolean isReady() { return isReady; }
 
-    /**
-     * Check if the background engine is ready
-     */
-    public boolean isReady() {
-        return isReady;
-    }
-
-    /**
-     * Destroy the background engine
-     */
     public void destroy() {
         if (bgWebView != null) {
             bgWebView.destroy();

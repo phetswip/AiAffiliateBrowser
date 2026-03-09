@@ -1,89 +1,173 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#0F1019">
 
-    <!-- Top URL Bar -->
-    <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/appBarLayout"
+    <!-- Main Browser Area -->
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="#1A1B2E"
-        android:elevation="4dp">
+        android:layout_height="match_parent">
 
-        <LinearLayout
+        <!-- Top URL Bar -->
+        <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/appBarLayout"
             android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:paddingHorizontal="8dp">
+            android:layout_height="wrap_content"
+            android:background="#1A1B2E"
+            android:elevation="4dp">
 
-            <ImageButton
-                android:id="@+id/btnBack"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:src="@android:drawable/ic_media_previous"
-                android:contentDescription="Back"
-                android:tint="#8888AA"
-                android:scaleType="centerInside" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingHorizontal="4dp">
 
-            <EditText
-                android:id="@+id/urlBar"
-                android:layout_width="0dp"
-                android:layout_height="36dp"
-                android:layout_weight="1"
-                android:layout_marginHorizontal="6dp"
-                android:background="@drawable/url_bar_bg"
-                android:paddingHorizontal="14dp"
-                android:textSize="14sp"
-                android:textColor="#E0E0FF"
-                android:textColorHint="#6666AA"
-                android:hint="ค้นหา หรือพิมพ์ URL"
-                android:inputType="textUri"
-                android:imeOptions="actionGo"
-                android:singleLine="true"
-                android:maxLines="1" />
+                <ImageButton
+                    android:id="@+id/btnBack"
+                    android:layout_width="34dp"
+                    android:layout_height="34dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@android:drawable/ic_media_previous"
+                    android:contentDescription="Back"
+                    android:tint="#8888AA"
+                    android:scaleType="centerInside" />
 
-            <ImageButton
-                android:id="@+id/btnMenu"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:src="@android:drawable/ic_menu_more"
-                android:contentDescription="Menu"
-                android:tint="#8888AA"
-                android:scaleType="centerInside" />
-        </LinearLayout>
+                <EditText
+                    android:id="@+id/urlBar"
+                    android:layout_width="0dp"
+                    android:layout_height="36dp"
+                    android:layout_weight="1"
+                    android:layout_marginHorizontal="4dp"
+                    android:background="@drawable/url_bar_bg"
+                    android:paddingHorizontal="14dp"
+                    android:textSize="14sp"
+                    android:textColor="#E0E0FF"
+                    android:textColorHint="#6666AA"
+                    android:hint="ค้นหา หรือพิมพ์ URL"
+                    android:inputType="textUri"
+                    android:imeOptions="actionGo"
+                    android:singleLine="true"
+                    android:maxLines="1" />
 
-        <!-- Progress bar -->
-        <ProgressBar
-            android:id="@+id/progressBar"
-            style="@android:style/Widget.ProgressBar.Horizontal"
+                <!-- Extension Button (opens popup/side panel) -->
+                <ImageButton
+                    android:id="@+id/btnExtension"
+                    android:layout_width="34dp"
+                    android:layout_height="34dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@android:drawable/ic_menu_manage"
+                    android:contentDescription="Extension"
+                    android:tint="#4F7FFF"
+                    android:scaleType="centerInside" />
+
+                <ImageButton
+                    android:id="@+id/btnMenu"
+                    android:layout_width="34dp"
+                    android:layout_height="34dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@android:drawable/ic_menu_more"
+                    android:contentDescription="Menu"
+                    android:tint="#8888AA"
+                    android:scaleType="centerInside" />
+            </LinearLayout>
+
+            <!-- Progress bar -->
+            <ProgressBar
+                android:id="@+id/progressBar"
+                style="@android:style/Widget.ProgressBar.Horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="3dp"
+                android:max="100"
+                android:progressTint="#4F7FFF"
+                android:progressBackgroundTint="@android:color/transparent"
+                android:visibility="gone" />
+
+        </com.google.android.material.appbar.AppBarLayout>
+
+        <!-- WebView with pull-to-refresh -->
+        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+            android:id="@+id/swipeRefresh"
             android:layout_width="match_parent"
-            android:layout_height="3dp"
-            android:max="100"
-            android:progressTint="#4F7FFF"
-            android:progressBackgroundTint="@android:color/transparent"
-            android:visibility="gone" />
+            android:layout_height="match_parent"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-    </com.google.android.material.appbar.AppBarLayout>
+            <WebView
+                android:id="@+id/webView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
 
-    <!-- WebView with pull-to-refresh -->
-    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-        android:id="@+id/swipeRefresh"
+        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+    <!-- Side Panel Overlay (Extension Popup / Side Panel) -->
+    <FrameLayout
+        android:id="@+id/sidePanelOverlay"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        android:visibility="gone"
+        android:clickable="true"
+        android:focusable="true">
 
-        <WebView
-            android:id="@+id/webView"
+        <!-- Dark backdrop -->
+        <View
+            android:id="@+id/sidePanelBackdrop"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            android:background="#80000000" />
 
-    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+        <!-- Side Panel Container (right-aligned, 85% width) -->
+        <FrameLayout
+            android:id="@+id/sidePanelContainer"
+            android:layout_width="340dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="end"
+            android:background="#1A1B2E"
+            android:elevation="16dp">
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+            <!-- Panel Header -->
+            <LinearLayout
+                android:id="@+id/sidePanelHeader"
+                android:layout_width="match_parent"
+                android:layout_height="44dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingHorizontal="12dp"
+                android:background="#12131F">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="🧩 Ai Affiliate Academy"
+                    android:textColor="#E0E0FF"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <ImageButton
+                    android:id="@+id/btnClosePanel"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@android:drawable/ic_menu_close_clear_cancel"
+                    android:contentDescription="Close"
+                    android:tint="#8888AA"
+                    android:scaleType="centerInside" />
+            </LinearLayout>
+
+            <!-- Panel WebView (renders popup.html) -->
+            <WebView
+                android:id="@+id/sidePanelWebView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="44dp" />
+
+        </FrameLayout>
+
+    </FrameLayout>
+
+</FrameLayout>
