@@ -5,7 +5,7 @@ set -e
 
 APP_NAME="Gradle"
 APP_BASE_NAME=$(basename "$0")
-DEFAULT_JVM_OPTS='"-Xmx64m" "-Xms64m"'
+DEFAULT_JVM_OPTS='-Xmx64m -Xms64m'
 
 # Resolve GRADLE_USER_HOME
 if [ -z "$GRADLE_USER_HOME" ]; then

@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fashion Mode</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-deep: #060a14;
+            --bg-card: rgba(12, 18, 35, 0.65);
+            --bg-input: rgba(8, 14, 28, 0.8);
+            --border-subtle: rgba(168, 85, 247, 0.08);
+            --border-focus: rgba(168, 85, 247, 0.3);
+            --text-primary: rgba(255, 255, 255, 0.95);
+            --text-secondary: rgba(255, 255, 255, 0.55);
+            --text-muted: rgba(255, 255, 255, 0.35);
+            --accent: #a855f7;
+            --accent-bright: #c084fc;
+            --accent-pink: #ec4899;
+            --accent-red: #ef4444;
+            --accent-green: #22c55e;
+            --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(168, 85, 247, 0.06);
+            --radius-card: 16px;
+            --radius-input: 10px;
+            --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-deep);
+            color: var(--text-primary);
+            min-width: 380px;
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 15px;
+        }
+
+        .section {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-card);
+            margin-bottom: 12px;
+            overflow: hidden;
+            box-shadow: var(--shadow-card);
+            backdrop-filter: blur(20px);
+            position: relative;
+        }
+
+        .section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(168, 85, 247, 0.12), transparent);
+        }
+
+        .section-header {
+            padding: 10px 14px;
+            background: rgba(168, 85, 247, 0.06);
+            font-size: 13px;
+            font-weight: bold;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .section-content {
+            padding: 12px 14px;
+        }
+
+        .form-group {
+            margin-bottom: 10px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+
+        input[type="text"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-input);
+            background: var(--bg-input);
+            color: var(--text-primary);
+            font-size: 12px;
+            font-family: inherit;
+            transition: border-color var(--transition);
+        }
+
+        input[type="text"]:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--border-focus);
+            box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.08);
+        }
+
+        textarea {
+            resize: vertical;
+        }
+
+        select {
+            padding: 8px;
+            cursor: pointer;
+        }
+
+        /* ═══ SUB-MODE CARDS ═══ */
+        .mode-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .mode-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 10px 6px;
+            background: var(--bg-input);
+            border: 2px solid transparent;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all var(--transition);
+            text-align: center;
+        }
+
+        .mode-card:hover {
+            border-color: rgba(168, 85, 247, 0.2);
+            background: rgba(168, 85, 247, 0.04);
+        }
+
+        .mode-card.active {
+            border-color: var(--accent);
+            background: rgba(168, 85, 247, 0.1);
+            box-shadow: 0 0 20px rgba(168, 85, 247, 0.15);
+        }
+
+        .mode-card .icon {
+            font-size: 24px;
+        }
+
+        .mode-card .name {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .mode-card .desc {
+            font-size: 9px;
+            color: var(--text-muted);
+        }
+
+        /* ═══ UPLOAD ═══ */
+        .upload-area {
+            min-height: 80px;
+            border: 2px dashed rgba(168, 85, 247, 0.2);
+            border-radius: var(--radius-input);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            position: relative;
+            transition: all var(--transition);
+        }
+
+        .upload-area:hover {
+            border-color: var(--border-focus);
+            background: rgba(168, 85, 247, 0.04);
+        }
+
+        .preview-image {
+            max-height: 80px;
+            border-radius: 8px;
+        }
+
+        .remove-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(239, 68, 68, 0.85);
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            font-size: 10px;
+        }
+
+        /* ═══ CONTROL ROW ═══ */
+        .control-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 12px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            backdrop-filter: blur(20px);
+            transition: border-color var(--transition);
+        }
+
+        .control-row:hover {
+            border-color: rgba(168, 85, 247, 0.15);
+        }
+
+        /* ═══ BUTTONS ═══ */
+        .btn-primary {
+            width: 100%;
+            padding: 14px;
+            font-size: 14px;
+            background: linear-gradient(135deg, #a855f7, #7c3aed);
+            border: none;
+            border-radius: 12px;
+            color: #fff;
+            cursor: pointer;
+            font-weight: bold;
+            font-family: inherit;
+            box-shadow: 0 4px 20px rgba(168, 85, 247, 0.25);
+            transition: all var(--transition);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(168, 85, 247, 0.35);
+        }
+
+        .btn-success {
+            width: 100%;
+            padding: 14px;
+            font-size: 14px;
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            border: none;
+            border-radius: 12px;
+            color: #fff;
+            cursor: pointer;
+            font-weight: bold;
+            font-family: inherit;
+            box-shadow: 0 4px 20px rgba(34, 197, 94, 0.2);
+            transition: all var(--transition);
+        }
+
+        .btn-danger {
+            width: 100%;
+            padding: 14px;
+            font-size: 14px;
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            border: none;
+            border-radius: 12px;
+            color: #fff;
+            cursor: pointer;
+            font-weight: bold;
+            font-family: inherit;
+            display: none;
+        }
+
+        .hint {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(168, 85, 247, 0.15);
+            border-radius: 4px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="fashionModeContent">
+
+        <!-- Header -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <h2 style="font-size: 18px; font-weight: 700; margin: 0;">
+                <span
+                    style="background: linear-gradient(135deg, #e9d5ff, #ffffff, #f0abfc); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">
+                    👗 Fashion Mode
+                </span>
+                <span style="font-size: 11px; font-weight: normal; color: rgba(255,255,255,0.35);">v1.5.5 |
+                    06.03.69</span>
+            </h2>
+            <button id="fashionResetBtn"
+                style="padding: 5px 10px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 8px; color: #ef4444; font-size: 11px; cursor: pointer; font-family: inherit;">
+                🔄 Reset
+            </button>
+        </div>
+
+        <!-- Sub-mode Selector -->
+        <div class="section">
+            <div class="section-header">⚡ เลือกสไตล์วิดีโอ</div>
+            <div class="section-content">
+                <div class="mode-grid">
+                    <div class="mode-card active" data-mode="spin">
+                        <div class="icon">🔄</div>
+                        <div class="name">หมุนโชว์ชุด</div>
+                        <div class="desc">Spin 360° (8s)</div>
+                    </div>
+                    <div class="mode-card" data-mode="runway">
+                        <div class="icon">👠</div>
+                        <div class="name">เดินแบบ</div>
+                        <div class="desc">Runway (16s)</div>
+                    </div>
+                    <div class="mode-card" data-mode="dance">
+                        <div class="icon">💃</div>
+                        <div class="name">เต้นโชว์ชุด</div>
+                        <div class="desc">Dance (8s)</div>
+                    </div>
+                    <div class="mode-card" data-mode="lookbook">
+                        <div class="icon">📖</div>
+                        <div class="name">Lookbook</div>
+                        <div class="desc">หลายชุด</div>
+                    </div>
+                    <div class="mode-card" data-mode="shop">
+                        <div class="icon">🏪</div>
+                        <div class="name">ในร้าน</div>
+                        <div class="desc">In-Shop</div>
+                    </div>
+                    <div class="mode-card" data-mode="tryon">
+                        <div class="icon">👗</div>
+                        <div class="name">ลองชุด</div>
+                        <div class="desc">Virtual Try-On</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Fashion Settings -->
+        <div class="section">
+            <div class="section-header">🎨 ตั้งค่าแฟชั่น</div>
+            <div class="section-content">
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <div class="form-group" style="flex: 1; min-width: 130px;">
+                        <label>หมวดเสื้อผ้า</label>
+                        <select id="fashionCategory">
+                            <option value="dress">ชุดเดรส / Dress</option>
+                            <option value="top">เสื้อ / Top</option>
+                            <option value="bottom">กางเกง-กระโปรง / Bottom</option>
+                            <option value="set">เซ็ตชุด / Full Set</option>
+                            <option value="sportswear">ชุดกีฬา / Sportswear</option>
+                            <option value="outerwear">เสื้อคลุม / Outerwear</option>
+                            <option value="swimwear">ชุดว่ายน้ำ / Swimwear</option>
+                            <option value="accessory">เครื่องประดับ / Accessories</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="flex: 1; min-width: 130px;">
+                        <label>สถานที่ถ่าย</label>
+                        <select id="fashionLocation">
+                            <option value="studio">Studio สีพื้น</option>
+                            <option value="bedroom">ห้องนอนสวยๆ</option>
+                            <option value="cafe">ร้านกาแฟ</option>
+                            <option value="street">ถนน / Street</option>
+                            <option value="park">สวนสาธารณะ</option>
+                            <option value="beach">ชายหาด</option>
+                            <option value="mall">ห้างสรรพสินค้า</option>
+                            <option value="shop">ในร้านเสื้อผ้า</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <div class="form-group" style="flex: 1; min-width: 130px;">
+                        <label>โทนภาพ</label>
+                        <select id="fashionTone">
+                            <option value="natural" selected>Natural ธรรมชาติ</option>
+                            <option value="warm">Warm อบอุ่น</option>
+                            <option value="cool">Cool เย็นสบาย</option>
+                            <option value="vibrant">Vibrant สดใส</option>
+                            <option value="pastel">Pastel นุ่มนวล</option>
+                            <option value="moody">Moody ดราม่า</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="flex: 1; min-width: 100px;">
+                        <label>เพศนางแบบ</label>
+                        <select id="fashionGender">
+                            <option value="female" selected>👩 ผู้หญิง</option>
+                            <option value="male">👨 ผู้ชาย</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 📦 เลือกสินค้า + Model -->
+        <div class="section">
+            <div class="section-header">📦 เลือกสินค้า & นางแบบ</div>
+            <div class="section-content">
+
+                <!-- Product Selector (from scraped products) -->
+                <div class="form-group">
+                    <label>เลือกสินค้าเสื้อผ้า <span style="color: #ef4444;">*</span></label>
+                    <select id="fashionProductSelect"
+                        style="width: 100%; padding: 10px; border: 1px solid var(--border-subtle); border-radius: 10px; background: var(--bg-input); color: var(--text-primary); font-size: 13px; cursor: pointer; font-family: inherit;">
+                        <option value="" disabled selected>⏳ กำลังโหลดสินค้า...</option>
+                    </select>
+                </div>
+
+                <!-- Product Preview + Model Upload (side by side) -->
+                <div style="display: flex; gap: 12px; margin-bottom: 10px;">
+                    <!-- Product Image (auto from selection) -->
+                    <div style="flex: 1;">
+                        <label
+                            style="font-size: 12px; color: var(--text-secondary); margin-bottom: 6px; display: block;">📷
+                            รูปสินค้า <span style="color: var(--text-muted);">(อัตโนมัติ)</span></label>
+                        <div class="upload-area" id="clothingUploadArea"
+                            style="pointer-events: none; opacity: 0.7; min-height: 80px;">
+                            <div class="upload-placeholder" id="clothingPlaceholder" style="text-align: center;">
+                                <span style="font-size: 20px; display: block;">👗</span>
+                                <span style="color: var(--text-muted); font-size: 9px;">เลือกสินค้าด้านบน</span>
+                            </div>
+                            <img id="clothingPreview" class="preview-image"
+                                style="display: none; max-height: 60px; max-width: 100%; border-radius: 4px;">
+                        </div>
+                    </div>
+                    <!-- Model Image (user upload) -->
+                    <div style="flex: 1;">
+                        <label
+                            style="font-size: 12px; color: var(--text-secondary); margin-bottom: 6px; display: block;">👤
+                            รูปนางแบบ <span style="color: var(--accent-bright);">(แนบรูป)</span></label>
+                        <div class="upload-area" id="modelUploadArea">
+                            <div class="upload-placeholder" id="modelPlaceholder" style="text-align: center;">
+                                <span style="font-size: 20px; display: block;">👤</span>
+                                <span style="color: var(--text-muted); font-size: 9px;">อัพโหลด</span>
+                            </div>
+                            <img id="modelPreview" class="preview-image"
+                                style="display: none; max-height: 60px; max-width: 100%; border-radius: 4px;">
+                            <button id="removeModel" class="remove-btn" style="display: none;">✕</button>
+                        </div>
+                        <input type="file" id="modelInput" accept=".png,.jpg,.jpeg,.webp" hidden>
+                    </div>
+                </div>
+
+                <!-- Auto-filled clothing description (editable) -->
+                <div class="form-group">
+                    <label>คำอธิบายเสื้อผ้า <span style="color: var(--text-muted);">(ดึงจากสินค้า
+                            แก้ไขได้)</span></label>
+                    <textarea id="fashionClothingDesc" placeholder="เลือกสินค้าด้านบนเพื่อกรอกอัตโนมัติ..." rows="2"
+                        style="width: 100%; padding: 10px; border: 1px solid var(--border-subtle); border-radius: 10px; background: var(--bg-input); color: var(--text-primary); font-family: inherit; resize: vertical;"></textarea>
+                </div>
+
+                <!-- Model description (optional) -->
+                <div class="form-group">
+                    <label>ลักษณะนางแบบ <span style="color: var(--text-muted);">(ไม่บังคับ)</span></label>
+                    <input type="text" id="fashionModelDesc" placeholder="เช่น: ผมยาวสีดำ ผิวขาว">
+                </div>
+
+                <p class="hint">💡 เลือกสินค้า → แนบรูปนางแบบ → ระบบทำให้ทั้งหมด!</p>
+            </div>
+        </div>
+
+        <!-- Caption & Hashtag (auto-filled) -->
+        <div class="section">
+            <div class="section-header">✏️ Caption & Hashtag <span
+                    style="font-size: 10px; color: var(--text-muted); font-weight: normal; margin-left: 6px;">(กรอกอัตโนมัติ)</span>
+            </div>
+            <div class="section-content">
+                <div style="display: flex; gap: 10px;">
+                    <div class="form-group" style="flex: 1;">
+                        <label>ชื่อสินค้า</label>
+                        <input type="text" id="fashionProductName" placeholder="(ดึงจากสินค้าอัตโนมัติ)" readonly
+                            style="opacity: 0.8; cursor: default;">
+                    </div>
+                    <div class="form-group" style="flex: 0 0 100px;">
+                        <label>ราคา</label>
+                        <input type="text" id="fashionPrice" placeholder="(อัตโนมัติ)" readonly
+                            style="opacity: 0.8; cursor: default;">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>แคปชั่นเพิ่มเติม <span style="color: var(--text-muted);">(ไม่บังคับ แก้ไขได้)</span></label>
+                    <input type="text" id="fashionExtraCaption" placeholder="เช่น: สั่งซื้อทัก DM เลย!">
+                </div>
+                <div class="form-group">
+                    <label>รายละเอียดเพิ่ม (AI) <span style="color: var(--text-muted);">(ไม่บังคับ)</span></label>
+                    <textarea id="fashionExtraDetails" placeholder="เช่น: เน้นโชว์ลายผ้า, ให้นางแบบยิ้มสดใส" rows="2"
+                        style="width: 100%; padding: 10px; border: 1px solid var(--border-subtle); border-radius: 10px; background: var(--bg-input); color: var(--text-primary); font-family: inherit; resize: vertical;"></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- Controls Row -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;">
+            <!-- Scene Count -->
+            <div class="control-row">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 16px;">🎬</span>
+                    <div>
+                        <div style="font-weight: 600; color: var(--text-primary); font-size: 12px;">จำนวนฉาก</div>
+                        <div style="font-size: 10px; color: var(--text-muted); margin-top: 1px;">1 ฉาก = 8 วิ</div>
+                    </div>
+                </div>
+                <select id="fashionSceneCount"
+                    style="width: 56px; padding: 4px 6px; background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-primary); font-size: 13px; text-align: center; cursor: pointer; font-family: inherit;">
+                    <option value="1" selected>1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                </select>
+            </div>
+            <!-- Post Method -->
+            <div class="control-row">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 16px;">📤</span>
+                    <div>
+                        <div style="font-weight: 600; color: var(--text-primary); font-size: 12px;">ลงคลิป</div>
+                        <div style="font-size: 10px; color: var(--text-muted); margin-top: 1px;">เลือกวิธี</div>
+                    </div>
+                </div>
+                <select id="fashionPostMethod"
+                    style="width: auto; min-width: 100px; padding: 4px 8px; background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-primary); font-size: 11px; cursor: pointer; font-family: inherit;">
+                    <option value="" disabled selected>--- เลือก ---</option>
+                    <option value="auto">Post TikTok</option>
+                    <option value="download">โหลดลงเครื่อง</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Aspect Ratio -->
+        <div class="control-row" style="padding: 14px 16px; margin-bottom: 12px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 18px;">📐</span>
+                <div>
+                    <div style="font-weight: 600; font-size: 14px;">ขนาดวิดีโอ</div>
+                    <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">แนวตั้ง & แนวนอน</div>
+                </div>
+            </div>
+            <select id="fashionAspectRatio"
+                style="width: auto; padding: 6px 10px; background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-primary); font-size: 14px; cursor: pointer; font-family: inherit;">
+                <option value="9:16" selected>📱 9:16</option>
+                <option value="16:9">🖥️ 16:9</option>
+            </select>
+        </div>
+
+        <!-- Create Storyboard Button -->
+        <button id="fashionCreateBtn" class="btn-primary" style="margin-bottom: 10px;">
+            🎨 Create Fashion Storyboard (AI คิดให้)
+        </button>
+
+        <!-- Script Selection Section -->
+        <div id="fashionScriptSection" class="section" style="margin-top: 8px; display: none;">
+            <div class="section-header" style="display: flex; justify-content: space-between; align-items: center;">
+                <span>📝 เลือก Script</span>
+            </div>
+            <div class="section-content">
+                <div style="font-size: 12px; color: var(--accent-bright); margin-bottom: 12px;">AI สร้าง Script
+                    มาให้เลือก</div>
+                <div id="fashionScriptList"
+                    style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; max-height: 400px; overflow-y: auto;">
+                </div>
+                <button type="button" id="fashionRunBtn" class="btn-success">▶ Create</button>
+                <button type="button" id="fashionStopBtn" class="btn-danger">⏹ Stop</button>
+
+                <!-- Loop Controls -->
+                <div style="margin-top: 12px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                    <label
+                        style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 12px; color: var(--text-secondary);">
+                        <input type="checkbox" id="fashionLoopEnabled"
+                            style="accent-color: #a855f7; width: 16px; height: 16px; cursor: pointer;">
+                        <span>Loop</span>
+                        <span id="fashionLoopProgress"
+                            style="color: var(--accent-bright); font-weight: bold; display: none;">(0/0)</span>
+                    </label>
+                    <div id="fashionLoopOptions"
+                        style="display: none; align-items: center; gap: 8px; font-size: 11px; color: var(--text-muted);">
+                        <label style="display: flex; align-items: center; gap: 4px;">
+                            <span>Rounds:</span>
+                            <input type="number" id="fashionLoopCount" value="3" min="1" max="100"
+                                style="width: 45px; padding: 3px 4px; background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-primary); font-size: 11px; text-align: center;">
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 4px;">
+                            <span>Delay:</span>
+                            <input type="number" id="fashionLoopDelay" value="30" min="5" max="300"
+                                style="width: 50px; padding: 3px 4px; background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-primary); font-size: 11px; text-align: center;">
+                            <span>s</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Progress Section -->
+        <div id="fashionProgressSection" class="section" style="margin-top: 8px; display: none;">
+            <div class="section-header"><span>⏳ Progress</span></div>
+            <div class="section-content">
+                <div id="fashionProgressStatus"
+                    style="font-size: 12px; color: var(--accent-bright); margin-bottom: 8px;">กำลังเตรียมการ...</div>
+                <div style="background: rgba(168, 85, 247, 0.1); border-radius: 8px; height: 8px; overflow: hidden;">
+                    <div id="fashionProgressBar"
+                        style="background: linear-gradient(90deg, #a855f7, #c084fc); height: 100%; width: 0%; transition: width 0.3s; border-radius: 8px;">
+                    </div>
+                </div>
+                <div style="margin-top: 10px; display: flex; gap: 15px; font-size: 11px; color: var(--text-muted);">
+                    <span>📷 รูป: <span id="fashionImageProgress">0/0</span></span>
+                    <span>🎬 คลิป: <span id="fashionVideoProgress">0/0</span></span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Activity Log -->
+    <div
+        style="margin-top: 15px; border: 1px solid var(--border-subtle); border-radius: 16px; background: var(--bg-card); backdrop-filter: blur(20px); padding: 12px; box-shadow: var(--shadow-card);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <h3 style="font-size: 13px; font-weight: 600; margin: 0;">Activity Log</h3>
+            <button id="fashionClearLogBtn"
+                style="padding: 2px 8px; background: transparent; border: 1px solid var(--border-subtle); border-radius: 6px; color: var(--text-muted); font-size: 10px; cursor: pointer; font-family: inherit;">Clear</button>
+        </div>
+        <div id="fashionLogContainer" style="min-height: 150px; max-height: 250px; overflow-y: auto;">
+            <p style="font-size: 12px; color: var(--text-muted); padding: 4px 8px;">No activity yet</p>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="fashion-prompt.js"></script>
+    <script src="fashion-ai.js"></script>
+    <script src="fashion-pipeline.js"></script>
+    <script src="fashion-mode-ui.js"></script>
+
+</body>
+
+</html>

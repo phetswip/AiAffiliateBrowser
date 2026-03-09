@@ -36,7 +36,7 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
         with:
-          gradle-version: '8.5'
+          gradle-version: '8.7'
 
       - name: Copy custom pages to assets
         run: |
@@ -85,7 +85,7 @@ jobs:
           BUILD_TOOLS=$(ls -d $ANDROID_HOME/build-tools/*/ | tail -1)
           APK_IN=$(find app/build -name "*-release-unsigned.apk" -o -name "*-release.apk" | head -1)
           APK_ALIGNED="app/build/outputs/apk/release/AiAffiliateBrowser-aligned.apk"
-          APK_SIGNED="app/build/outputs/apk/release/AiAffiliateBrowser-v1.5.0-signed.apk"
+          APK_SIGNED="app/build/outputs/apk/release/AiAffiliateBrowser-v2.0.0-signed.apk"
 
           if [ -n "$APK_IN" ]; then
             mkdir -p app/build/outputs/apk/release/
@@ -106,7 +106,7 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: AiAffiliateBrowser-v1.5.0
+          name: AiAffiliateBrowser-v2.0.0
           path: |
             app/build/outputs/apk/**/*.apk
 
@@ -114,26 +114,33 @@ jobs:
         if: inputs.build_type == 'release' || github.event_name == 'push'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.5.0
-          name: "AiAffiliate Browser v1.5.0"
+          tag_name: v2.0.0
+          name: "AiAffiliate Browser v2.0.0 — Full Extension"
           draft: true
           generate_release_notes: true
           files: |
             app/build/outputs/apk/**/*.apk
           body: |
-            ## AiAffiliate Browser v1.5.0
+            ## AiAffiliate Browser v2.0.0 — Full Extension Compatibility
 
-            ### ✨ คุณสมบัติ
-            - 🎨 Liquid Glass UI (ธีมฟ้า-ขาว / มืด)
+            ### 🚀 ใหม่ใน v2.0
+            - 🗂️ Multi-Tab System — รองรับหลาย tab พร้อมกัน (Auto Post, Comment Bot)
+            - 🧩 Extension ครบทุกโหมด — 37 scripts ฝังครบ
+            - 🔔 Background Service — 24H Comment Bot ทำงานเบื้องหลัง
+            - 🚫 App Redirect Blocking — ไม่เปิด TikTok app อัตโนมัติ
             - 🖥️ Desktop View เป็นค่าเริ่มต้น
-            - 🧩 Extension Manager
-            - 📦 Ai Affiliate Academy ฝังมาพร้อม
-            - ⬇️ Download Manager
-            - 🔄 Pull-to-Refresh
-            - 🇹🇭 รองรับภาษาไทย
+
+            ### ✨ โหมดที่ใช้ได้
+            - 📝 Auto Post — โพสต์อัตโนมัติ
+            - 💬 Comment Bot — ตอบ comment อัตโนมัติ
+            - ⏰ 24H Comment Bot — ทำงานตลอด 24 ชม.
+            - 🛒 Product Scrape — ดึงข้อมูลสินค้า
+            - 🎬 Storyboard / Viral Mode
+            - 👗 Fashion Mode
+            - 🎨 3D Cartoon (AI Studio)
 
             ### 📱 วิธีติดตั้ง
             1. ดาวน์โหลด APK
             2. เปิดไฟล์บน Android
             3. อนุญาตติดตั้งจากแหล่งที่ไม่รู้จัก
-            4. เปิดแอพ → พร้อมใช้!
+            4. เปิดแอพ → กดปุ่ม 🧩 → เริ่มใช้งาน!

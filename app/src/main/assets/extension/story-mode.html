@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Story Mode - Storyboard Generator</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-deep: #060a14;
+      --bg-card: rgba(12, 18, 35, 0.65);
+      --bg-card-hover: rgba(16, 24, 45, 0.75);
+      --bg-input: rgba(8, 14, 28, 0.8);
+      --border-subtle: rgba(80, 140, 255, 0.08);
+      --border-focus: rgba(80, 140, 255, 0.3);
+      --text-primary: rgba(255, 255, 255, 0.95);
+      --text-secondary: rgba(255, 255, 255, 0.55);
+      --text-muted: rgba(255, 255, 255, 0.35);
+      --accent-blue: #508cff;
+      --accent-bright: #60a5fa;
+      --accent-orange: #f59e0b;
+      --accent-red: #ef4444;
+      --accent-green: #22c55e;
+      --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(80, 140, 255, 0.06);
+      --radius-card: 16px;
+      --radius-input: 10px;
+      --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-deep);
+      color: var(--text-primary);
+      min-width: 380px;
+      max-width: 500px;
+      margin: 0 auto;
+      padding: 15px;
+    }
+
+    .auto-section {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-card);
+      margin-bottom: 12px;
+      overflow: hidden;
+      box-shadow: var(--shadow-card);
+      backdrop-filter: blur(20px);
+      position: relative;
+    }
+
+    .auto-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(80, 140, 255, 0.12), transparent);
+      border-radius: var(--radius-card) var(--radius-card) 0 0;
+    }
+
+    .auto-section-header {
+      padding: 10px 14px;
+      background: rgba(80, 140, 255, 0.06);
+      font-size: 13px;
+      font-weight: bold;
+      color: var(--text-primary);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .auto-section-content {
+      padding: 12px 14px;
+    }
+
+    .form-group {
+      margin-bottom: 10px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .hint {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .required {
+      color: var(--accent-red);
+    }
+
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    input[type="text"],
+    textarea,
+    select {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-input);
+      background: var(--bg-input);
+      color: var(--text-primary);
+      font-size: 12px;
+      font-family: inherit;
+      transition: border-color var(--transition);
+    }
+
+    input[type="text"]:focus,
+    textarea:focus,
+    select:focus {
+      outline: none;
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px rgba(80, 140, 255, 0.08);
+    }
+
+    textarea {
+      resize: vertical;
+    }
+
+    select {
+      padding: 8px;
+      cursor: pointer;
+    }
+
+    .upload-area {
+      min-height: 80px;
+      border: 2px dashed rgba(80, 140, 255, 0.2);
+      border-radius: var(--radius-input);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+      transition: all var(--transition);
+    }
+
+    .upload-area:hover {
+      border-color: var(--border-focus);
+      background: rgba(80, 140, 255, 0.04);
+    }
+
+    .upload-placeholder {
+      text-align: center;
+    }
+
+    .preview-image {
+      max-height: 80px;
+      border-radius: 8px;
+    }
+
+    .remove-btn {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      background: rgba(239, 68, 68, 0.85);
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+      font-size: 10px;
+      transition: all var(--transition);
+    }
+
+    .remove-btn:hover {
+      background: rgba(239, 68, 68, 1);
+      transform: scale(1.1);
+    }
+
+    .btn {
+      border: none;
+      border-radius: 12px;
+      color: #fff;
+      cursor: pointer;
+      font-weight: bold;
+      font-family: inherit;
+      transition: all var(--transition);
+    }
+
+    .btn:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+
+    .full-width {
+      width: 100%;
+    }
+
+    #generateStoryboardBtn {
+      margin-top: 15px;
+      padding: 14px;
+      font-size: 14px;
+      background: linear-gradient(135deg, #508cff, #6366f1);
+      border: none;
+      border-radius: 12px;
+      color: #fff;
+      cursor: pointer;
+      font-weight: bold;
+      font-family: inherit;
+      width: 100%;
+      box-shadow: 0 4px 20px rgba(80, 140, 255, 0.25);
+      transition: all var(--transition);
+    }
+
+    #generateStoryboardBtn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(80, 140, 255, 0.35);
+    }
+
+    #startStoryFlowBtn {
+      margin-top: 10px;
+      padding: 14px;
+      font-size: 14px;
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      border: none;
+      border-radius: 12px;
+      color: #fff;
+      cursor: pointer;
+      font-weight: bold;
+      font-family: inherit;
+      width: 100%;
+      box-shadow: 0 4px 20px rgba(34, 197, 94, 0.2);
+      transition: all var(--transition);
+    }
+
+    #startStoryFlowBtn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(34, 197, 94, 0.3);
+    }
+
+    /* ═══ SCROLLBAR ═══ */
+    ::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(80, 140, 255, 0.15);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(80, 140, 255, 0.3);
+    }
+
+    /* ═══ GLASS CONTROL ROW ═══ */
+    .aaa-control-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      backdrop-filter: blur(20px);
+      transition: border-color var(--transition);
+    }
+
+    .aaa-control-row:hover {
+      border-color: rgba(80, 140, 255, 0.15);
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="creatorStoryboardContent">
+
+    <!-- Header with Reset button -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+      <h2 style="font-size: 18px; font-weight: 700; margin: 0;">
+        <span
+          style="background: linear-gradient(135deg, #a8c8ff, #ffffff, #c0d8ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Viral
+          Mode</span>
+        <span style="font-size: 11px; font-weight: normal; color: rgba(255,255,255,0.35);">v1.5.5 | 06.03.69</span>
+      </h2>
+      <button id="resetAllBtn"
+        style="padding: 5px 10px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 8px; color: #ef4444; font-size: 11px; cursor: pointer; display: flex; align-items: center; gap: 4px; font-family: inherit; transition: all 0.2s;">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+          <path d="M3 3v5h5" />
+        </svg>
+        Reset
+      </button>
+    </div>
+
+    <!-- Reset Confirmation Modal -->
+    <div id="resetConfirmModal"
+      style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center;">
+      <div
+        style="background: linear-gradient(135deg, rgba(12, 18, 38, 0.96), rgba(16, 24, 48, 0.94)); border: 1px solid rgba(80, 140, 255, 0.12); border-radius: 18px; padding: 24px; max-width: 300px; text-align: center; box-shadow: 0 8px 40px rgba(0,0,0,0.5);">
+        <div style="font-size: 32px; margin-bottom: 12px;">⚠️</div>
+        <h3 style="color: rgba(255,255,255,0.95); font-size: 16px; margin: 0 0 8px 0; font-family: inherit;">Reset
+          ทุกอย่าง?</h3>
+        <p style="color: rgba(255,255,255,0.55); font-size: 12px; margin: 0 0 16px 0;">Form, Storyboard และ Log
+          จะถูกล้างทั้งหมด</p>
+        <div style="display: flex; gap: 10px; justify-content: center;">
+          <button id="resetConfirmNo"
+            style="padding: 8px 20px; background: rgba(80, 140, 255, 0.08); border: 1px solid rgba(80, 140, 255, 0.15); border-radius: 10px; color: rgba(255,255,255,0.7); font-size: 12px; cursor: pointer; font-family: inherit;">ยกเลิก</button>
+          <button id="resetConfirmYes"
+            style="padding: 8px 20px; background: linear-gradient(135deg, #ef4444, #dc2626); border: none; border-radius: 10px; color: #fff; font-size: 12px; cursor: pointer; font-weight: 600; font-family: inherit; box-shadow: 0 4px 16px rgba(239, 68, 68, 0.3);">Reset</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hidden: always-on character flag for pipeline compatibility -->
+    <input type="checkbox" id="storyUseCustomCharacter" checked hidden>
+
+    <!-- Section: Video & Style -->
+    <div class="auto-section">
+      <div class="auto-section-header">
+        <span>🎨 ตั้งค่าสไตล์</span>
+      </div>
+      <div class="auto-section-content" style="display: block;">
+        <div class="form-row" style="display: flex; gap: 10px; flex-wrap: wrap;">
+          <div class="form-group" style="flex: 1; min-width: 140px;">
+            <label>Video Style <span style="color: #ef4444;">*</span></label>
+            <select id="storyImageStyle">
+              <option value="pixar_3d" selected>Pixar 3D Animation</option>
+              <option value="realistic">Realistic</option>
+              <!-- ซ่อนไว้ก่อน
+              <option value="disney_3d">Disney 3D Animation</option>
+              <option value="anime">Anime</option>
+              <option value="cartoon_2d">Cartoon 2D</option>
+              <option value="watercolor">Watercolor</option>
+              -->
+            </select>
+          </div>
+          <div class="form-group" style="flex: 1; min-width: 140px;">
+            <label>สไตล์บทพูด</label>
+            <select id="storyMood">
+              <option value="random" selected>AI สุ่มให้</option>
+              <option value="viral_roast">🤬 หยาบคายดุดัน</option>
+              <option value="Friendly">😊 เป็นมิตร</option>
+              <option value="Enthusiastic">🤩 ตื่นเต้น</option>
+              <option value="Professional">💼 มืออาชีพ</option>
+              <option value="Energetic">⚡ มีพลัง</option>
+              <option value="Calm">☁️ สงบ</option>
+              <option value="Persuasive">🎯 โน้มน้าว</option>
+              <option value="Humorous">😂 ตลกขบขัน</option>
+              <option value="Informative">📚 ให้ข้อมูล</option>
+              <option value="Dramatic">🎭 ดราม่า</option>
+              <option value="Casual">🎵 สบายๆ</option>
+              <option value="Rapper">🎤 แร็พเปอร์</option>
+            </select>
+            <p class="hint" style="margin-top: 2px; font-size: 9px;">ถ้าไม่เลือก AI จะทำการสุ่มให้</p>
+          </div>
+          <div class="form-group" style="flex: 1; min-width: 100px;">
+            <label>ภาษาพูด</label>
+            <select id="storyLanguage">
+              <option value="th" selected>ไทย</option>
+              <option value="en">อังกฤษ</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Row 1: Zoom + Veo Lower Priority -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
+      <!-- Zoom Google Flow Toggle -->
+      <div class="aaa-control-row">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 16px;">🔍</span>
+          <div>
+            <div style="font-weight: 600; color: var(--text-primary); font-size: 12px;">Zoom Flow</div>
+            <div style="font-size: 10px; color: var(--text-muted); margin-top: 1px;">ย่อเว็บ 33%</div>
+          </div>
+        </div>
+        <button type="button" id="zoomFlowToggleBtn"
+          style="padding: 4px 10px; font-size: 11px; background: rgba(80, 140, 255, 0.08); border: 1px solid rgba(80, 140, 255, 0.15); border-radius: 8px; color: var(--accent-bright); cursor: pointer; transition: all 0.2s; font-family: inherit;">Toggle</button>
+      </div>
+      <!-- Veo 3.1 Lower Priority Toggle -->
+      <div class="aaa-control-row">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 16px;">⏳</span>
+          <div>
+            <div style="font-weight: 600; color: var(--text-primary); font-size: 12px;">Veo Lower Priority</div>
+            <div style="font-size: 10px; color: var(--text-muted); margin-top: 1px;">0 เครดิต (ช้ากว่า)</div>
+          </div>
+        </div>
+        <div id="veoLowerPriorityToggle"
+          style="width: 40px; min-width: 40px; height: 22px; border-radius: 11px; background: rgba(80, 140, 255, 0.15); cursor: pointer; position: relative; transition: background 0.2s;">
+          <div
+            style="width: 18px; height: 18px; border-radius: 50%; background: rgba(255,255,255,0.4); position: absolute; top: 2px; left: 2px; transition: all 0.2s;">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Row 2: จำนวนฉาก + เลือกวิธีลงคลิป -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;">
+      <!-- จำนวนฉาก -->
+      <div class="aaa-control-row">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 16px;">🎬</span>
+          <div>
+            <div style="font-weight: 600; color: var(--text-primary); font-size: 12px;">จำนวนฉาก</div>
+            <div style="font-size: 10px; color: var(--text-muted); margin-top: 1px;">1 ฉาก = 8 วิ</div>
+          </div>
+        </div>
+        <select id="storySceneCount"
+          style="width: 56px; padding: 4px 6px; background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-primary); font-size: 13px; text-align: center; cursor: pointer; font-family: inherit;">
+          <option value="1" selected>1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+          <option value="6">6</option>
+          <option value="7">7</option>
+          <option value="8">8</option>
+          <option value="9">9</option>
+          <option value="10">10</option>
+        </select>
+      </div>
+      <!-- Post TikTok -->
+      <div class="aaa-control-row">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 16px;">📤</span>
+          <div>
+            <div id="storyPostTiktokLabel" style="font-weight: 600; color: var(--text-primary); font-size: 12px;">ลงคลิป
+            </div>
+            <div style="font-size: 10px; color: var(--text-muted); margin-top: 1px;">เลือกวิธี</div>
+          </div>
+        </div>
+        <select id="storyPostTiktok"
+          style="width: auto; min-width: 100px; padding: 4px 8px; background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-primary); font-size: 11px; cursor: pointer; font-family: inherit;">
+          <option value="" disabled selected>--- เลือก ---</option>
+          <option disabled>──────</option>
+          <option value="auto">Post TikTok</option>
+          <option value="download">โหลดลงเครื่อง</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Section: Character -->
+    <div class="auto-section">
+      <div class="auto-section-header" style="display: flex; justify-content: space-between; align-items: flex-start;">
+        <span style="padding-top: 4px;">🎭 Character <span style="color: #ef4444;">*</span></span>
+        <div style="display: flex; flex-direction: column; gap: 4px; align-items: flex-end;">
+          <!-- Toggle: ใช้ตัวละครเดียวกันทุกฉาก -->
+          <label id="storySameCharLabel"
+            style="display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text-muted); cursor: pointer; user-select: none;">
+            <span>ใช้ตัวละครเดียวกันทุกฉาก</span>
+            <div id="storySameCharToggle"
+              style="width: 36px; height: 20px; background: rgba(80, 140, 255, 0.15); border-radius: 10px; position: relative; transition: background 0.2s; cursor: pointer;">
+              <div id="storySameCharDot"
+                style="width: 16px; height: 16px; background: rgba(255,255,255,0.4); border-radius: 50%; position: absolute; top: 2px; left: 2px; transition: all 0.2s;">
+              </div>
+            </div>
+          </label>
+          <!-- Toggle: ใช้สินค้าเดียวกันทุกฉาก -->
+          <label id="storySameProductLabel"
+            style="display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text-muted); cursor: pointer; user-select: none;">
+            <span>ใช้สินค้าเดียวกันทุกฉาก</span>
+            <div id="storySameProductToggle"
+              style="width: 36px; height: 20px; background: rgba(80, 140, 255, 0.15); border-radius: 10px; position: relative; transition: background 0.2s; cursor: pointer;">
+              <div id="storySameProductDot"
+                style="width: 16px; height: 16px; background: rgba(255,255,255,0.4); border-radius: 50%; position: absolute; top: 2px; left: 2px; transition: all 0.2s;">
+              </div>
+            </div>
+          </label>
+        </div>
+      </div>
+      <!-- Quick voice gender buttons -->
+      <div id="storyVoiceQuickSelect"
+        style="display: flex; gap: 6px; align-items: center; padding: 6px 14px; justify-content: flex-end;">
+        <span style="font-size: 10px; color: var(--text-muted);">เลือกเสียงพูดทุกฉาก: <span style="color: #ef4444;">*
+            ต้องเลือก</span></span>
+        <button type="button" id="voiceAllMaleBtn"
+          style="padding: 3px 10px; font-size: 10px; background: rgba(80, 140, 255, 0.08); border: 1px solid rgba(80, 140, 255, 0.15); border-radius: 6px; color: var(--text-secondary); cursor: pointer; transition: all 0.2s; font-family: inherit;">👨
+          ผู้ชาย</button>
+        <button type="button" id="voiceAllFemaleBtn"
+          style="padding: 3px 10px; font-size: 10px; background: rgba(80, 140, 255, 0.08); border: 1px solid rgba(80, 140, 255, 0.15); border-radius: 6px; color: var(--text-secondary); cursor: pointer; transition: all 0.2s; font-family: inherit;">👩
+          ผู้หญิง</button>
+      </div>
+      <div class="auto-section-content" style="display: block;">
+        <!-- Container สำหรับ Character inputs -->
+        <div id="storyCharacterContainer">
+          <!-- Character Box 1 -->
+          <div class="character-box" id="characterBox1"
+            style="margin-bottom: 12px; padding: 12px; background: rgba(8, 14, 28, 0.5); border-radius: 12px; border: 1px solid var(--border-subtle);">
+            <div id="characterBoxLabel1"
+              style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px; font-weight: 500;">ตัวละคร</div>
+            <div style="display: flex; gap: 12px; align-items: flex-start;">
+              <div style="flex: 1;">
+                <input type="text" id="storyChar1Name" placeholder="ชื่อ เช่น: แตงกวา, พี่ส้ม"
+                  style="width: 100%; font-size: 12px; margin-bottom: 6px; padding: 8px; background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-primary); box-sizing: border-box; font-family: inherit;">
+                <input type="text" id="storyChar1Desc" placeholder="หน้าตา เช่น: ผู้หญิงผมยาว, แมวส้มอ้วน"
+                  style="width: 100%; font-size: 12px; padding: 8px; background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-primary); box-sizing: border-box; font-family: inherit;">
+                <div style="display: flex; align-items: center; gap: 6px; margin-top: 6px;">
+                  <span style="font-size: 11px; color: var(--text-muted); white-space: nowrap;">🔊 เสียงพูด</span>
+                  <select id="storyChar1Gender"
+                    style="flex: 1; font-size: 12px; padding: 8px; background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-primary); box-sizing: border-box; cursor: pointer; font-family: inherit;">
+                    <option value="random">🎲 สุ่ม</option>
+                    <option value="female">👩 ผู้หญิง</option>
+                    <option value="male">👨 ผู้ชาย</option>
+                  </select>
+                </div>
+                <!-- Product inside character box -->
+                <div style="display: flex; align-items: center; gap: 6px; margin-top: 6px;">
+                  <span style="font-size: 11px; color: var(--text-muted); white-space: nowrap;">📦 สินค้า</span>
+                  <select id="storyProduct1Select"
+                    style="flex: 1; font-size: 12px; padding: 8px; background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-primary); box-sizing: border-box; cursor: pointer; font-family: inherit;">
+                    <option value="">-- เลือกสินค้า --</option>
+                  </select>
+                  <input type="text" id="storyProduct1Name" placeholder="ชื่อสินค้า เช่น: ครีมกันแดด XYZ"
+                    style="flex: 1; font-size: 12px; padding: 8px; background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-primary); box-sizing: border-box; display: none; font-family: inherit;">
+                </div>
+              </div>
+              <div style="width: 80px; flex-shrink: 0; display: flex; flex-direction: column; gap: 6px;">
+                <div class="upload-area" id="storyCharacter1UploadArea"
+                  style="position: relative; min-height: 80px; padding: 6px; background: var(--bg-input); border: 1px dashed rgba(80, 140, 255, 0.2); border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                  <div class="upload-placeholder" id="storyCharacter1Placeholder" style="text-align: center;">
+                    <span style="font-size: 20px; display: block;">🖼️</span>
+                    <span style="color: var(--text-muted); font-size: 9px;">ตัวละคร</span>
+                  </div>
+                  <img id="storyCharacter1Preview" class="preview-image"
+                    style="display: none; max-height: 60px; max-width: 100%; border-radius: 4px;">
+                  <button id="storyRemoveCharacter1" class="remove-btn"
+                    style="display: none; position: absolute; top: 2px; right: 2px; background: rgba(239, 68, 68, 0.85); color: white; border: none; border-radius: 50%; width: 18px; height: 18px; cursor: pointer; font-size: 10px;">✕</button>
+                </div>
+                <input type="file" id="storyCharacter1Input" accept=".png,.jpg,.jpeg,.webp" hidden>
+                <div class="upload-area" id="storyProduct1UploadArea"
+                  style="position: relative; min-height: 80px; padding: 6px; background: var(--bg-input); border: 1px dashed rgba(80, 140, 255, 0.2); border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                  <div class="upload-placeholder" id="storyProduct1Placeholder" style="text-align: center;">
+                    <span style="font-size: 20px; display: block;">📦</span>
+                    <span style="color: var(--text-muted); font-size: 9px;">สินค้า</span>
+                  </div>
+                  <img id="storyProduct1Preview" class="preview-image"
+                    style="display: none; max-height: 60px; max-width: 100%; border-radius: 4px;">
+                  <button id="storyRemoveProduct1" class="remove-btn"
+                    style="display: none; position: absolute; top: 2px; right: 2px; background: rgba(239, 68, 68, 0.85); color: white; border: none; border-radius: 50%; width: 18px; height: 18px; cursor: pointer; font-size: 10px;">✕</button>
+                </div>
+                <input type="file" id="storyProduct1Input" accept=".png,.jpg,.jpeg,.webp" hidden>
+              </div>
+            </div>
+          </div>
+          <!-- Additional character boxes will be added here by JavaScript -->
+          <div id="additionalCharacterBoxes"></div>
+        </div>
+        <p class="hint" style="margin-top: 8px;">💡 ต้องใส่ "ชื่อ" หรือ "รูป" อย่างน้อย 1 อย่าง<br>🔁
+          อยากใช้ตัวละครเดิมทุกฉาก? เปิดปุ่มด้านบนขวา</p>
+      </div>
+    </div>
+
+    <!-- Section: หัวข้อและเนื้อเรื่อง + รายละเอียด -->
+    <div class="auto-section">
+      <div class="auto-section-header">
+        <span>📝 เนื้อหา <span style="color: #ef4444;">*</span></span>
+      </div>
+      <div class="auto-section-content" style="display: block;">
+        <div class="form-group" style="margin-bottom: 10px;">
+          <label
+            style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px; display: block;">หัวข้อและเนื้อเรื่อง</label>
+          <textarea id="storyTopic" placeholder="เช่น: 5 อาหารลดพุงที่คนไม่รู้, ทำไมแมวชอบกล่อง, เคล็ดลับนอนหลับง่าย"
+            rows="2"
+            style="width: 100%; padding: 10px; border: 1px solid var(--border-subtle); border-radius: 10px; background: var(--bg-input); color: var(--text-primary); box-sizing: border-box; resize: vertical; min-height: 50px; font-family: inherit;"></textarea>
+        </div>
+        <div class="form-group">
+          <label
+            style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px; display: block;">รายละเอียดเพิ่มเติม
+            <span style="color: var(--text-muted);">(ไม่บังคับ)</span></label>
+          <textarea id="storyDetails" placeholder="เช่น: ให้ตัวละครชิมอาหารแล้วทำหน้าตกใจ, เน้นฉากตลกขำๆ" rows="2"
+            style="width: 100%; padding: 10px; border: 1px solid var(--border-subtle); border-radius: 10px; background: var(--bg-input); color: var(--text-primary); box-sizing: border-box; resize: vertical; min-height: 50px; font-family: inherit;"></textarea>
+        </div>
+        <p class="hint">💡 AI จะคิด Storyboard ให้</p>
+      </div>
+    </div>
+
+    <!-- สัดส่วน -->
+    <div class="aaa-control-row" style="padding: 14px 16px; margin-bottom: 12px;">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span style="font-size: 18px;">📐</span>
+        <div>
+          <div style="font-weight: 600; color: var(--text-primary); font-size: 14px;">เลือกขนาดวิดีโอ</div>
+          <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">แนวตั้ง & แนวนอน</div>
+        </div>
+      </div>
+      <select id="storyAspectRatio"
+        style="width: auto; padding: 6px 10px; background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-primary); font-size: 14px; cursor: pointer; font-family: inherit;">
+        <option value="9:16" selected>📱 9:16</option>
+        <option value="16:9">🖥️ 16:9</option>
+      </select>
+    </div>
+
+    <!-- ปุ่มสร้าง Storyboard -->
+    <button id="generateStoryboardBtn">
+      Create Storyboard (AI คิดให้)
+    </button>
+
+    <!-- ปุ่มเริ่มทำงาน (แสดงหลัง preview) -->
+    <button id="startStoryFlowBtn" style="display: none;">
+      ▶ Create
+    </button>
+
+    <!-- Preview Storyboard (HIDDEN - replaced by Script Selection) -->
+    <div id="storyboardPreviewSection" class="auto-section" style="display: none !important;">
+      <div id="storyboardPreviewContent"></div>
+      <button type="button" id="regenerateStoryboardBtn" style="display: none;"></button>
+    </div>
+
+    <!-- Script Selection Section -->
+    <div id="scriptVoiceSection" class="auto-section" style="margin-top: 15px; display: none;">
+      <div class="auto-section-header" style="display: flex; justify-content: space-between; align-items: center;">
+        <span>📝 Script</span>
+      </div>
+      <div class="auto-section-content" style="display: block;">
+        <!-- Subtitle -->
+        <div style="font-size: 12px; color: var(--accent-bright); margin-bottom: 12px;">เลือก Script ที่ต้องการ</div>
+
+        <!-- Label -->
+        <div style="font-size: 14px; font-weight: bold; color: var(--text-primary); margin-bottom: 10px;">เลือก Script
+        </div>
+
+        <!-- Script Cards -->
+        <div id="scriptSelectionList"
+          style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; max-height: 400px; overflow-y: auto;">
+          <!-- Cards will be populated dynamically -->
+        </div>
+
+        <!-- Run button -->
+        <button type="button" id="storyRunBtn"
+          style="width: 100%; padding: 14px; background: linear-gradient(135deg, #508cff, #6366f1); border: none; border-radius: 12px; color: #fff; font-weight: bold; font-size: 14px; cursor: pointer; margin-top: 4px; transition: all 0.25s; box-shadow: 0 4px 20px rgba(80, 140, 255, 0.25); font-family: inherit;">
+          ▶ Create
+        </button>
+        <button type="button" id="storyStopBtn"
+          style="display: none; width: 100%; padding: 14px; background: linear-gradient(135deg, #ef4444, #dc2626); border: none; border-radius: 12px; color: #fff; font-weight: bold; font-size: 14px; cursor: pointer; margin-top: 4px; transition: all 0.25s; box-shadow: 0 4px 20px rgba(239, 68, 68, 0.25); font-family: inherit;">
+          ⏹ Stop
+        </button>
+
+        <!-- ปุ่มดาวน์โหลดคลิปที่เสร็จแล้ว -->
+        <button type="button" id="concatenateAllBtn"
+          style="display: none; width: 100%; padding: 14px; background: linear-gradient(135deg, #508cff, #6366f1); border: none; border-radius: 12px; color: #fff; font-weight: bold; font-size: 14px; cursor: pointer; margin-top: 8px; transition: all 0.25s; box-shadow: 0 4px 20px rgba(80, 140, 255, 0.25); font-family: inherit;">
+          📥 ดาวน์โหลดคลิปที่เสร็จแล้ว
+        </button>
+
+        <!-- ปุ่มทำต่อจากที่ค้าง -->
+        <button type="button" id="resumeBtn"
+          style="display: none; width: 100%; padding: 14px; background: linear-gradient(135deg, #22c55e, #16a34a); border: none; border-radius: 12px; color: #fff; font-weight: bold; font-size: 14px; cursor: pointer; margin-top: 8px; transition: all 0.25s; box-shadow: 0 4px 20px rgba(34, 197, 94, 0.2); font-family: inherit;">
+          ▶️ ทำต่อจากที่ค้าง
+        </button>
+
+        <!-- Loop Controls -->
+        <div style="margin-top: 12px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+          <label id="storyLoopLabel"
+            style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 12px; color: var(--text-secondary); user-select: none;">
+            <input type="checkbox" id="storyboardLoopEnabled"
+              style="accent-color: #508cff; width: 16px; height: 16px; cursor: pointer;">
+            <span>Loop</span>
+            <span id="storyLoopProgress"
+              style="color: var(--accent-bright); font-weight: bold; display: none;">(0/0)</span>
+          </label>
+          <div id="storyboardLoopOptionsRow"
+            style="display: none; align-items: center; gap: 8px; font-size: 11px; color: var(--text-muted);">
+            <label style="display: flex; align-items: center; gap: 4px;">
+              <span>Rounds:</span>
+              <input type="number" id="storyLoopCount" value="3" min="1" max="100"
+                style="width: 45px; padding: 3px 4px; background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-primary); font-size: 11px; text-align: center; font-family: inherit;">
+            </label>
+            <label style="display: flex; align-items: center; gap: 4px;">
+              <span>Delay:</span>
+              <input type="number" id="storyLoopDelay" value="30" min="5" max="300"
+                style="width: 50px; padding: 3px 4px; background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-primary); font-size: 11px; text-align: center; font-family: inherit;">
+              <span>s</span>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Progress Section -->
+    <div id="storyProgressSection" class="auto-section" style="margin-top: 15px; display: none;">
+      <div class="auto-section-header">
+        <span>⏳ Progress</span>
+      </div>
+      <div class="auto-section-content" style="display: block;">
+        <div id="storyProgressStatus" style="font-size: 12px; color: var(--accent-bright); margin-bottom: 8px;">
+          กำลังเตรียมการ...</div>
+        <div style="background: rgba(80, 140, 255, 0.1); border-radius: 8px; height: 8px; overflow: hidden;">
+          <div id="storyProgressBar"
+            style="background: linear-gradient(90deg, #508cff, #60a5fa); height: 100%; width: 0%; transition: width 0.3s; border-radius: 8px;">
+          </div>
+        </div>
+        <div style="margin-top: 10px; display: flex; gap: 15px; font-size: 11px; color: var(--text-muted);">
+          <span>📷 รูป: <span id="storyImageProgress">0/0</span></span>
+          <span>🎬 คลิป: <span id="storyVideoProgress">0/0</span></span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Activity Log Section -->
+  <div
+    style="margin-top: 15px; border: 1px solid var(--border-subtle); border-radius: 16px; background: var(--bg-card); backdrop-filter: blur(20px); padding: 12px; box-shadow: var(--shadow-card); position: relative;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+      <h3 style="font-size: 13px; font-weight: 600; color: var(--text-primary); margin: 0;">Activity Log</h3>
+      <button id="clearLogBtn"
+        style="padding: 2px 8px; background: transparent; border: 1px solid var(--border-subtle); border-radius: 6px; color: var(--text-muted); font-size: 10px; cursor: pointer; font-family: inherit; transition: all 0.2s;">Clear</button>
+    </div>
+    <div id="storyLogContainer" style="min-height: 150px; max-height: 250px; overflow-y: auto; font-family: inherit;">
+      <p style="font-size: 12px; color: var(--text-muted); padding: 4px 8px;">No activity yet</p>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="storyboard-ai.js"></script>
+  <script src="story-pipeline.js"></script>
+  <script src="story-mode-ui.js"></script>
+
+</body>
+
+</html>

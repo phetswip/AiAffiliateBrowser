@@ -1,0 +1,495 @@
+<!doctype html>
+<html lang="en" class="dark">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ai Affiliate Academy</title>
+  <meta name="description" content="Ai Affiliate Academy - AI Content Creator" />
+  <script>
+    // ✅ BLOCKING: Sanitize product data BEFORE React loads
+    (function () {
+      try {
+        for (var i = 0; i < localStorage.length; i++) {
+          var k = localStorage.key(i);
+          if (!k || k.indexOf('product_set') === -1) continue;
+          var raw = localStorage.getItem(k);
+          if (!raw || raw[0] !== '[') continue;
+          try {
+            var arr = JSON.parse(raw), changed = 0;
+            for (var j = 0; j < arr.length; j++) {
+              var r = arr[j];
+              if (!r || typeof r !== 'object') continue;
+              var fields = ['productName', 'productCode', 'productHighlights', 'productDetails'];
+              for (var f = 0; f < fields.length; f++) {
+                var v = r[fields[f]];
+                if (v === undefined || v === null) { r[fields[f]] = ''; changed++; }
+                else if (typeof v !== 'string') { r[fields[f]] = (typeof v === 'object' ? (v.name || v.title || '') : String(v)); changed++; }
+              }
+              if (!r.productName && (r.name || r.title)) { r.productName = r.name || r.title || ''; changed++; }
+            }
+            if (changed > 0) localStorage.setItem(k, JSON.stringify(arr));
+          } catch (e) { }
+        }
+      } catch (e) { }
+    })();
+  </script>
+  <script>
+    // ✅ BLOCKING: Auth/Subscription bypass — fake auth_token + intercept auth API calls
+    // This MUST run before main.js loads so React's AuthProvider gets fake user data
+    (function () {
+      /* ── 1. Set fake auth_token so startup check doesn't bail ── */
+      if (!localStorage.getItem('auth_token')) {
+        localStorage.setItem('auth_token', 'aaa-lifetime-bypass-token');
+      }
+
+      /* ── 2. Fake user data for /api/auth/me ── */
+      var fakeUser = {
+        id: 'aaa-local-user',
+        email: 'admin@aiaffiliateacademy.com',
+        name: 'Ai Affiliate Academy',
+        role: 'admin',
+        subscription: {
+          plan: 'lifetime',
+          status: 'active',
+          expiresAt: '2099-12-31T23:59:59.000Z',
+          isActive: true
+        },
+        subscriptionPlan: 'lifetime',
+        subscriptionStatus: 'active',
+        subscriptionExpiresAt: '2099-12-31T23:59:59.000Z',
+        isSubscriptionActive: true,
+        plan: 'lifetime',
+        status: 'active',
+        expiresAt: '2099-12-31T23:59:59.000Z',
+        createdAt: '2024-01-01T00:00:00.000Z',
+        updatedAt: new Date().toISOString()
+      };
+
+      /* ── 3. Patch fetch — intercept /api/auth/* before they reach the network ── */
+      var _realFetch = window.fetch;
+      var _patchedForAuth = false;
+
+      function _fakeResponse(data, status) {
+        return Promise.resolve(new Response(JSON.stringify(data), {
+          status: status || 200,
+          headers: { 'Content-Type': 'application/json' }
+        }));
+      }
+
+      if (!_patchedForAuth) {
+        var _prevFetch = window.fetch;
+        window.fetch = function (url, opts) {
+          try {
+            var u = typeof url === 'string' ? url : (url && url.url ? url.url : '');
+            // Intercept /api/auth/me → return fake user
+            if (u.indexOf('/api/auth/me') !== -1) {
+              return _fakeResponse({ user: fakeUser });
+            }
+            // Intercept /api/auth/login → return fake success
+            if (u.indexOf('/api/auth/login') !== -1) {
+              return _fakeResponse({ user: fakeUser, token: 'aaa-lifetime-bypass-token' });
+            }
+            // Intercept /api/auth/register → return fake success
+            if (u.indexOf('/api/auth/register') !== -1) {
+              return _fakeResponse({ user: fakeUser, token: 'aaa-lifetime-bypass-token' });
+            }
+            // Intercept /api/auth/logout → return fake success (but don't actually logout)
+            if (u.indexOf('/api/auth/logout') !== -1) {
+              return _fakeResponse({ success: true });
+            }
+            // Intercept /api/auth/change-password → return fake success
+            if (u.indexOf('/api/auth/change-password') !== -1) {
+              return _fakeResponse({ success: true });
+            }
+            // Intercept /api/affiliate/* → return empty data
+            if (u.indexOf('/api/affiliate/') !== -1) {
+              return _fakeResponse({ data: [] });
+            }
+          } catch (e) { }
+          return _prevFetch.apply(this, arguments);
+        };
+        _patchedForAuth = true;
+      }
+
+      /* ── 4. Block EventSource (SSE) to prevent DEVICE_CHANGED force-logout ── */
+      var _OrigES = window.EventSource;
+      window.EventSource = function (url) {
+        // Return a dummy EventSource that does nothing
+        var dummy = {
+          readyState: 0,
+          url: url,
+          onopen: null,
+          onmessage: null,
+          onerror: null,
+          close: function () { this.readyState = 2; },
+          addEventListener: function () { },
+          removeEventListener: function () { },
+          dispatchEvent: function () { return false; }
+        };
+        // Simulate successful connection
+        setTimeout(function () {
+          dummy.readyState = 1;
+          if (typeof dummy.onopen === 'function') {
+            dummy.onopen({ type: 'open' });
+          }
+        }, 100);
+        return dummy;
+      };
+      window.EventSource.CONNECTING = 0;
+      window.EventSource.OPEN = 1;
+      window.EventSource.CLOSED = 2;
+
+      console.log('[AAA] Auth bypass: token set, API interceptor active, SSE blocked');
+    })();
+  </script>
+  <script>
+    // ✅ BLOCKING: AI Model Selection — Fetch interceptor for dynamic model switching
+    // Supports: OpenAI ↔ OpenRouter model swapping + Gemini as full main provider
+    (function () {
+      var _origFetch = window.fetch;
+
+      /* ── Helper: read localStorage key (handles JSON-wrapped strings) ── */
+      function _lsGet(k) {
+        var v = localStorage.getItem(k);
+        if (!v) return '';
+        try { return JSON.parse(v) || ''; } catch (e) { return v; }
+      }
+
+      /* ── Helper: Convert OpenAI messages → Gemini request body ── */
+      function _toGemini(oaiBody) {
+        var msgs = oaiBody.messages || [];
+        var systemParts = [];
+        var contents = [];
+
+        for (var i = 0; i < msgs.length; i++) {
+          var m = msgs[i];
+          var role = m.role || 'user';
+          var text = typeof m.content === 'string' ? m.content :
+            (Array.isArray(m.content) ? m.content.map(function (p) { return p.text || ''; }).join('\n') : String(m.content || ''));
+
+          if (role === 'system') {
+            systemParts.push({ text: text });
+          } else {
+            contents.push({
+              role: role === 'assistant' ? 'model' : 'user',
+              parts: [{ text: text }]
+            });
+          }
+        }
+
+        // Ensure alternating user/model — Gemini requires this
+        // If first message is not 'user', prepend an empty user message
+        if (contents.length > 0 && contents[0].role !== 'user') {
+          contents.unshift({ role: 'user', parts: [{ text: '.' }] });
+        }
+
+        var gemBody = { contents: contents };
+        if (systemParts.length > 0) {
+          gemBody.systemInstruction = { parts: systemParts };
+        }
+
+        // Map temperature and max_tokens
+        var genConfig = {};
+        if (oaiBody.temperature !== undefined) genConfig.temperature = oaiBody.temperature;
+        if (oaiBody.max_tokens !== undefined) genConfig.maxOutputTokens = oaiBody.max_tokens;
+        if (Object.keys(genConfig).length > 0) gemBody.generationConfig = genConfig;
+
+        return gemBody;
+      }
+
+      /* ── Helper: Convert Gemini response → OpenAI response format ── */
+      function _fromGemini(gemData) {
+        var text = '';
+        try {
+          text = gemData.candidates[0].content.parts[0].text || '';
+        } catch (e) {
+          text = gemData.error ? ('Error: ' + (gemData.error.message || JSON.stringify(gemData.error))) : '';
+        }
+
+        return {
+          id: 'gem-' + Date.now(),
+          object: 'chat.completion',
+          created: Math.floor(Date.now() / 1000),
+          model: 'gemini',
+          choices: [{
+            index: 0,
+            message: { role: 'assistant', content: text },
+            finish_reason: 'stop'
+          }],
+          usage: {
+            prompt_tokens: (gemData.usageMetadata && gemData.usageMetadata.promptTokenCount) || 0,
+            completion_tokens: (gemData.usageMetadata && gemData.usageMetadata.candidatesTokenCount) || 0,
+            total_tokens: (gemData.usageMetadata && gemData.usageMetadata.totalTokenCount) || 0
+          }
+        };
+      }
+
+      window.fetch = function (url, opts) {
+        try {
+          var urlStr = typeof url === 'string' ? url : (url && url.url ? url.url : '');
+          var isOpenAI = urlStr.indexOf('api.openai.com/v1/chat/completions') !== -1;
+          var isOpenRouter = urlStr.indexOf('openrouter.ai/api/v1/chat/completions') !== -1;
+
+          if ((isOpenAI || isOpenRouter) && opts && opts.body) {
+            var body = typeof opts.body === 'string' ? JSON.parse(opts.body) : opts.body;
+            if (body && body.model) {
+              var origModel = body.model;
+              var aiProv = _lsGet('aiProvider');
+              var orKey = _lsGet('openRouterKey');
+              var oaKey = _lsGet('openaiKey');
+              var gemKey = _lsGet('geminiApiKey');
+              var orModel = _lsGet('openRouterModel');
+              var gemModel = _lsGet('geminiModel');
+
+              /* ═══════════════════════════════════════════
+                 GEMINI ADAPTER — Full provider translation
+                 ═══════════════════════════════════════════ */
+              if (aiProv === 'gemini' && gemKey) {
+                var gModel = gemModel || 'gemini-2.0-flash';
+                var gemUrl = 'https://generativelanguage.googleapis.com/v1beta/models/' +
+                  gModel + ':generateContent?key=' + gemKey.trim();
+                var gemBody = _toGemini(body);
+
+                console.log('[AAA-AI] Gemini: ' + origModel + ' → ' + gModel + ' (adapter)');
+
+                // Call Gemini API and convert response back to OpenAI format
+                return _origFetch.call(this, gemUrl, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(gemBody),
+                  signal: opts.signal || undefined
+                }).then(function (gemResp) {
+                  if (!gemResp.ok) {
+                    // Return error as-is but wrapped in OpenAI format
+                    return gemResp.text().then(function (errText) {
+                      var errMsg = 'Gemini API Error (' + gemResp.status + '): ';
+                      try { errMsg += JSON.parse(errText).error.message; } catch (e) { errMsg += errText.substring(0, 200); }
+                      console.error('[AAA-AI] ' + errMsg);
+
+                      if (body.stream) {
+                        var errChunk = {
+                          id: 'gem-err', object: 'chat.completion.chunk', created: Math.floor(Date.now() / 1000), model: gModel,
+                          choices: [{ index: 0, delta: { role: 'assistant', content: errMsg }, finish_reason: 'stop' }]
+                        };
+                        return new Response('data: ' + JSON.stringify(errChunk) + '\n\ndata: [DONE]\n\n', {
+                          status: 200, headers: { 'Content-Type': 'text/event-stream' }
+                        });
+                      }
+
+                      var fakeResp = {
+                        id: 'gem-err', object: 'chat.completion', model: gModel,
+                        choices: [{ index: 0, message: { role: 'assistant', content: errMsg }, finish_reason: 'stop' }]
+                      };
+                      return new Response(JSON.stringify(fakeResp), {
+                        status: 200, headers: { 'Content-Type': 'application/json' }
+                      });
+                    });
+                  }
+                  return gemResp.json().then(function (gemData) {
+                    var oaiResp = _fromGemini(gemData);
+                    oaiResp.model = gModel;
+
+                    if (body.stream) {
+                      var chunk = {
+                        id: oaiResp.id,
+                        object: 'chat.completion.chunk',
+                        created: oaiResp.created,
+                        model: gModel,
+                        choices: [{
+                          index: 0,
+                          delta: { role: 'assistant', content: oaiResp.choices[0].message.content },
+                          finish_reason: 'stop'
+                        }]
+                      };
+                      return new Response('data: ' + JSON.stringify(chunk) + '\n\ndata: [DONE]\n\n', {
+                        status: 200, headers: { 'Content-Type': 'text/event-stream' }
+                      });
+                    }
+
+                    return new Response(JSON.stringify(oaiResp), {
+                      status: 200, headers: { 'Content-Type': 'application/json' }
+                    });
+                  });
+                });
+              }
+
+              /* ═══════════════════════════════════════════
+                 OPENROUTER — Endpoint + model swap
+                 ═══════════════════════════════════════════ */
+              var newUrl = urlStr;
+              var newModel = origModel;
+
+              if (aiProv === 'openrouter' && orKey) {
+                newModel = orModel || 'openai/gpt-4o';
+                if (isOpenAI) {
+                  newUrl = 'https://openrouter.ai/api/v1/chat/completions';
+                  var newHeaders = {};
+                  if (opts.headers) {
+                    var h = opts.headers;
+                    if (h instanceof Headers) {
+                      h.forEach(function (v, k) { newHeaders[k] = v; });
+                    } else {
+                      for (var hk in h) { newHeaders[hk] = h[hk]; }
+                    }
+                  }
+                  newHeaders['Authorization'] = 'Bearer ' + orKey.trim();
+                  newHeaders['HTTP-Referer'] = 'https://sora-creator-suite.app';
+                  newHeaders['X-Title'] = 'Ai Affiliate Academy';
+                  opts = Object.assign({}, opts, { headers: newHeaders });
+                }
+              } else if (isOpenRouter && orModel) {
+                newModel = orModel;
+              }
+
+              // Apply model change for OpenAI/OpenRouter
+              if (newModel !== origModel || newUrl !== urlStr) {
+                body.model = newModel;
+                opts = Object.assign({}, opts, { body: JSON.stringify(body) });
+                if (newUrl !== urlStr) url = newUrl;
+                if (newModel !== origModel) {
+                  console.log('[AAA-AI] Model: ' + origModel + ' → ' + newModel + (newUrl !== urlStr ? ' (endpoint redirected)' : ''));
+                }
+              }
+            }
+          }
+        } catch (e) {
+          console.warn('[AAA-AI] Interceptor error:', e.message);
+        }
+        return _origFetch.call(this, url, opts);
+      };
+    })();
+  </script>
+  <script>
+    // ✅ BLOCKING: Provider bridge — If user selected Gemini/OpenRouter but has no openaiKey,
+    // set a placeholder openaiKey so mo() returns a non-null config and fetch() is called.
+    // The fetch interceptor above will then redirect it to the correct provider.
+    (function () {
+      function _g(k) { var v = localStorage.getItem(k); if (!v) return ''; try { return JSON.parse(v) || ''; } catch (e) { return v; } }
+      var prov = _g('aiProvider');
+      var oaK = _g('openaiKey');
+      var orK = _g('openRouterKey');
+      var gemK = _g('geminiApiKey');
+      var isBridge = oaK === 'gemini-bridge-key' || oaK === 'openrouter-bridge-key';
+
+      // Gemini bridge: set placeholder if Gemini selected but no real openaiKey
+      if (prov === 'gemini' && gemK && (!oaK || isBridge)) {
+        localStorage.setItem('openaiKey', JSON.stringify('gemini-bridge-key'));
+        console.log('[AAA-AI] Gemini bridge: placeholder openaiKey set');
+      }
+      // OpenRouter bridge: set placeholder if OpenRouter selected but no real openaiKey
+      else if (prov === 'openrouter' && orK && (!oaK || isBridge)) {
+        localStorage.setItem('openaiKey', JSON.stringify('openrouter-bridge-key'));
+        console.log('[AAA-AI] OpenRouter bridge: placeholder openaiKey set');
+      }
+      // Clean up bridge key if user switches to OpenAI or has a real key
+      else if (prov === 'openai' && isBridge) {
+        localStorage.removeItem('openaiKey');
+        console.log('[AAA-AI] Bridge placeholder removed (switched to OpenAI)');
+      }
+    })();
+  </script>
+  <script type="module" crossorigin src="assets/main.js"></script>
+  <link rel="stylesheet" crossorigin href="assets/main.css">
+  <link rel="stylesheet" href="assets/glass-theme.css?v=39">
+  <!-- Anti-flash: hide #root until ui-customizer.js is ready -->
+  <style>
+    #root {
+      opacity: 0 !important;
+      transition: opacity 0.15s ease !important;
+    }
+
+    #root.aaa-ready {
+      opacity: 1 !important;
+    }
+  </style>
+</head>
+
+<body style="background-color: #0b1120;">
+  <!-- ═══════════════════════════════════════════════════════
+       LICENSE KEY GATE — shown before main app
+       ═══════════════════════════════════════════════════════ -->
+  <div id="license-gate" style="display:none;">
+    <div class="license-card">
+      <!-- Glow effects -->
+      <div class="license-glow license-glow-1"></div>
+      <div class="license-glow license-glow-2"></div>
+
+      <!-- Logo -->
+      <div class="license-logo-wrap">
+        <img src="assets/brand-logo.png" alt="Ai Affiliate Academy" class="license-logo" />
+      </div>
+
+      <!-- Brand -->
+      <h1 class="license-brand">Ai Affiliate Academy</h1>
+      <p class="license-subtitle">AI Content Creator</p>
+
+      <!-- Divider -->
+      <div class="license-divider"></div>
+
+      <!-- Key Input -->
+      <label class="license-label" for="license-key-input">🔑 License Key</label>
+      <input type="text" id="license-key-input" class="license-input" placeholder="AAA-XXXX-XXXX-XXXX" maxlength="18"
+        autocomplete="off" spellcheck="false" />
+
+      <!-- Profile Name Input -->
+      <label class="license-label" for="profile-name-input" style="margin-top:14px;">💼 ตั้งชื่ออุปกรณ์
+        (optional)</label>
+      <input type="text" id="profile-name-input" class="license-input license-input-profile"
+        placeholder="เช่น MacBook Pro บ้าน, PC ออฟฟิศ..." maxlength="40" autocomplete="off" spellcheck="false" />
+
+      <!-- Error Message -->
+      <div id="license-error" class="license-error" style="display:none;"></div>
+
+      <!-- Activate Button -->
+      <button id="license-activate-btn" class="license-btn-activate">
+        ✨ เปิดใช้งาน
+      </button>
+
+      <!-- Transfer Button (hidden by default) -->
+      <button id="license-transfer-btn" class="license-btn-transfer" style="display:none;">
+        🔄 ย้ายสิทธิ์มาเครื่องนี้
+      </button>
+
+      <!-- Device Manager Panel (hidden by default) -->
+      <div id="device-manager" style="display:none;">
+        <div class="device-manager-header">
+          <span>🔒 อุปกรณ์ที่ใช้งาน Key นี้</span>
+          <span id="device-count-badge" class="device-count-badge"></span>
+        </div>
+        <div id="device-list" class="device-list">
+          <!-- Devices rendered by JS -->
+        </div>
+        <button id="device-activate-btn" class="license-btn-activate" style="display:none;">
+          ✨ เปิดใช้งานบนเครื่องนี้
+        </button>
+        <button id="device-back-btn" class="device-back-btn">
+          ← กลับ
+        </button>
+      </div>
+
+      <!-- Status text -->
+      <div id="license-status" class="license-status"></div>
+
+      <!-- Footer -->
+      <div class="license-footer">
+        <p>ติดต่อซื้อ License Key ได้ที่ผู้พัฒนา
+          <a href="https://www.facebook.com/aIaffiliateacademy" target="_blank" rel="noopener"
+            class="license-link">คลิกที่นี่</a>
+        </p>
+        <p class="license-copyright">© 2026 Ai Affiliate Academy - All rights reserved.</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="root" style="display:none;"></div>
+
+  <!-- API Code Proxy — MUST load before AI call scripts -->
+  <script src="aaa-ai-proxy.js"></script>
+  <!-- License gate MUST load before React -->
+  <script src="assets/license.js"></script>
+  <script src="assets/integrity.js"></script>
+  <script src="assets/ui-customizer.js?v=38" defer></script>
+</body>
+
+</html>

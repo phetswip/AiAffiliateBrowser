@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.app.DownloadManager;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -16,11 +15,9 @@ import android.view.animation.TranslateAnimation;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.CookieManager;
-import android.webkit.DownloadListener;
 import android.webkit.URLUtil;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
-import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -35,17 +32,18 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 /**
- * AiAffiliate Browser — Main Activity v2
- * Full browser + Chrome Extension Bridge + Side Panel
+ * AiAffiliate Browser — Main Activity v3
+ * Multi-tab browser + Chrome Extension Bridge + Side Panel + ForegroundService
  */
-public class MainActivity extends AppCompatActivity implements ExtensionBridge.SidePanelCallback {
+public class MainActivity extends AppCompatActivity
+        implements ExtensionBridge.SidePanelCallback, TabManager.TabEventListener {
 
     private static final String TAG = "AiBrowser";
 
-    private WebView webView;
     private EditText urlBar;
     private ProgressBar progressBar;
     private SwipeRefreshLayout swipeRefresh;
+    private FrameLayout webViewContainer;
     private ImageButton btnBack, btnMenu, btnExtension;
 
     // Side Panel
@@ -56,9 +54,10 @@ public class MainActivity extends AppCompatActivity implements ExtensionBridge.S
     private WebView sidePanelWebView;
     private boolean sidePanelOpen = false;
 
-    // Extension Bridge
+    // Core components
     private ExtensionBridge extensionBridge;
     private BackgroundEngine backgroundEngine;
+    private TabManager tabManager;
 
     // URLs
     private static final String NTP_URL = "file:///android_asset/custom-pages/new-tab/new-tab.html";
@@ -66,34 +65,7 @@ public class MainActivity extends AppCompatActivity implements ExtensionBridge.S
     private static final String EXT_MANAGER_URL = "file:///android_asset/custom-pages/extension-manager/extension-manager.html";
     private static final String POPUP_URL = "file:///android_asset/extension/popup.html";
 
-    private static final String DESKTOP_UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 " +
-            "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
-
     private SharedPreferences prefs;
-    private boolean desktopMode = true;
-
-    // Content Script Rules
-    private static final ContentScriptRule[] CONTENT_SCRIPT_RULES = {
-            new ContentScriptRule(
-                    new String[] { "https://www.tiktok.com/view/product/*" },
-                    new String[] { "tiktok-product-content-script.js" }),
-            new ContentScriptRule(
-                    new String[] { "https://www.fastmoss.com/*" },
-                    new String[] { "fastmoss-product-content-script.js" }),
-            new ContentScriptRule(
-                    new String[] { "https://www.kalodata.com/*" },
-                    new String[] { "kalodata-product-content-script.js" }),
-            new ContentScriptRule(
-                    new String[] { "https://www.tiktok.com/tiktokstudio/*" },
-                    new String[] {
-                            "overlay-notification.js",
-                            "tiktok-seller-content-script.js",
-                            "tiktok-comment-bot.js"
-                    }),
-            new ContentScriptRule(
-                    new String[] { "https://www.tiktok.com/*" },
-                    new String[] { "tiktok-injected.js", "tiktok-poster-content.js" })
-    };
 
     @Override
     @SuppressLint({ "SetJavaScriptEnabled", "JavascriptInterface" })
@@ -102,14 +74,18 @@ public class MainActivity extends AppCompatActivity implements ExtensionBridge.S
         setContentView(R.layout.activity_main);
 
         prefs = getSharedPreferences("aiaffiliate_prefs", MODE_PRIVATE);
-        desktopMode = prefs.getBoolean("desktop_mode", true);
 
         // Init Extension Bridge
         extensionBridge = new ExtensionBridge(this);
         extensionBridge.setSidePanelCallback(this);
 
         initViews();
-        setupWebView();
+
+        // Init TabManager
+        tabManager = new TabManager(this, extensionBridge, webViewContainer);
+        tabManager.setEventListener(this);
+        extensionBridge.setTabManager(tabManager);
+
         setupSidePanel();
         setupUrlBar();
         setupMenu();
@@ -118,16 +94,20 @@ public class MainActivity extends AppCompatActivity implements ExtensionBridge.S
         backgroundEngine = new BackgroundEngine(this, extensionBridge);
         backgroundEngine.initialize();
 
-        Log.i(TAG, "Browser + Extension Bridge initialized ✅");
-
-        // Handle intent
+        // Create first tab
         Intent intent = getIntent();
         String intentUrl = intent.getDataString();
-        loadUrl(intentUrl != null && !intentUrl.isEmpty() ? intentUrl : NTP_URL);
+        String startUrl = (intentUrl != null && !intentUrl.isEmpty()) ? intentUrl : NTP_URL;
+        tabManager.createTab(startUrl, true);
+
+        // Start foreground service for background persistence
+        startExtensionService();
+
+        Log.i(TAG, "Browser v3 initialized ✅ Multi-tab + Extension Bridge");
     }
 
     private void initViews() {
-        webView = findViewById(R.id.webView);
+        webViewContainer = findViewById(R.id.webViewContainer);
         urlBar = findViewById(R.id.urlBar);
         progressBar = findViewById(R.id.progressBar);
         swipeRefresh = findViewById(R.id.swipeRefresh);
@@ -137,140 +117,53 @@ public class MainActivity extends AppCompatActivity implements ExtensionBridge.S
 
         swipeRefresh.setColorSchemeColors(0xFF4F7FFF, 0xFF7C3AED);
         swipeRefresh.setProgressBackgroundColorSchemeColor(0xFF1A1B2E);
-        swipeRefresh.setOnRefreshListener(() -> webView.reload());
+        swipeRefresh.setOnRefreshListener(() -> {
+            tabManager.reloadActiveTab();
+            swipeRefresh.setRefreshing(false);
+        });
 
         btnBack.setOnClickListener(v -> {
-            if (webView.canGoBack())
-                webView.goBack();
+            if (tabManager.canGoBack())
+                tabManager.goBack();
         });
 
-        // Extension button → open side panel with popup.html
         btnExtension.setOnClickListener(v -> {
-            if (sidePanelOpen) {
+            if (sidePanelOpen)
                 closeSidePanel();
-            } else {
+            else
                 openSidePanel();
-            }
         });
     }
 
-    @SuppressLint({ "SetJavaScriptEnabled", "JavascriptInterface" })
-    private void setupWebView() {
-        WebSettings settings = webView.getSettings();
-        settings.setJavaScriptEnabled(true);
-        settings.setDomStorageEnabled(true);
-        settings.setDatabaseEnabled(true);
-        settings.setAllowFileAccess(true);
-        settings.setAllowFileAccessFromFileURLs(true);
-        settings.setAllowUniversalAccessFromFileURLs(true);
-        settings.setCacheMode(WebSettings.LOAD_DEFAULT);
-        settings.setLoadWithOverviewMode(true);
-        settings.setUseWideViewPort(true);
-        settings.setSupportZoom(true);
-        settings.setBuiltInZoomControls(true);
-        settings.setDisplayZoomControls(false);
-        settings.setMediaPlaybackRequiresUserGesture(false);
-        settings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
+    // ─── TabManager.TabEventListener ───
+    @Override
+    public void onUrlChanged(int tabId, String url) {
+        runOnUiThread(() -> updateUrlBar(url));
+    }
 
-        if (desktopMode)
-            settings.setUserAgentString(DESKTOP_UA);
+    @Override
+    public void onTitleChanged(int tabId, String title) {
+        /* could update title */ }
 
-        CookieManager.getInstance().setAcceptCookie(true);
-        CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true);
-
-        // Register bridges
-        webView.addJavascriptInterface(new NativeBridge(this), "aabNative");
-        webView.addJavascriptInterface(extensionBridge, "aabBridge");
-        extensionBridge.setContentWebView(webView);
-
-        // WebViewClient with content script injection
-        webView.setWebViewClient(new WebViewClient() {
-            @Override
-            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-                String url = request.getUrl().toString();
-                if (url.startsWith("intent://") || url.startsWith("market://")) {
-                    try {
-                        Intent intent = Intent.parseUri(url, Intent.URI_INTENT_SCHEME);
-                        startActivity(intent);
-                    } catch (Exception e) {
-                        /* ignore */ }
-                    return true;
-                }
-                return false;
-            }
-
-            @Override
-            public void onPageStarted(WebView view, String url, Bitmap favicon) {
-                super.onPageStarted(view, url, favicon);
-                progressBar.setVisibility(View.VISIBLE);
-                updateUrlBar(url);
-
-                // Notify background of tab loading
-                if (url != null && !url.startsWith("file://") && !url.startsWith("data:")) {
-                    extensionBridge.notifyTabComplete(url); // status: loading
-                }
-            }
-
-            @Override
-            public void onPageFinished(WebView view, String url) {
-                super.onPageFinished(view, url);
-                progressBar.setVisibility(View.GONE);
-                swipeRefresh.setRefreshing(false);
-                updateUrlBar(url);
-
-                // Inject extension on real web pages
-                if (url != null && !url.startsWith("file://") && !url.startsWith("data:")) {
-                    injectChromeShim(view);
-                    injectMatchingContentScripts(view, url);
-
-                    // Notify background: tab complete
-                    extensionBridge.notifyTabComplete(url);
-                }
-            }
-        });
-
-        // WebChromeClient
-        webView.setWebChromeClient(new WebChromeClient() {
-            @Override
-            public void onProgressChanged(WebView view, int newProgress) {
-                progressBar.setProgress(newProgress);
-                if (newProgress >= 100)
-                    progressBar.setVisibility(View.GONE);
-            }
-
-            @Override
-            public boolean onShowFileChooser(WebView webView, ValueCallback<Uri[]> filePathCallback,
-                    FileChooserParams fileChooserParams) {
-                Intent intent = fileChooserParams.createIntent();
-                try {
-                    startActivityForResult(intent, 1001);
-                } catch (Exception e) {
-                    filePathCallback.onReceiveValue(null);
-                }
-                return true;
-            }
-        });
-
-        // Download handler
-        webView.setDownloadListener((url, userAgent, contentDisposition, mimetype, contentLength) -> {
-            try {
-                DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
-                String filename = URLUtil.guessFileName(url, contentDisposition, mimetype);
-                request.setTitle(filename);
-                request.setDescription("Downloading...");
-                request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
-                request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, filename);
-                request.addRequestHeader("User-Agent", userAgent);
-                DownloadManager dm = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
-                dm.enqueue(request);
-                Toast.makeText(MainActivity.this, "⬇️ กำลังดาวน์โหลด: " + filename, Toast.LENGTH_SHORT).show();
-            } catch (Exception e) {
-                Toast.makeText(MainActivity.this, "❌ ดาวน์โหลดไม่สำเร็จ", Toast.LENGTH_SHORT).show();
-            }
+    @Override
+    public void onProgressChanged(int tabId, int progress) {
+        runOnUiThread(() -> {
+            progressBar.setProgress(progress);
+            progressBar.setVisibility(progress < 100 ? View.VISIBLE : View.GONE);
         });
     }
 
-    // ─── Side Panel Setup ───
+    @Override
+    public void onTabCreated(int tabId) {
+        Log.d(TAG, "Tab created: " + tabId + " (total: " + tabManager.getTabCount() + ")");
+    }
+
+    @Override
+    public void onTabRemoved(int tabId) {
+        Log.d(TAG, "Tab removed: " + tabId + " (total: " + tabManager.getTabCount() + ")");
+    }
+
+    // ─── Side Panel ───
     @SuppressLint({ "SetJavaScriptEnabled", "JavascriptInterface" })
     private void setupSidePanel() {
         sidePanelOverlay = findViewById(R.id.sidePanelOverlay);
@@ -279,7 +172,6 @@ public class MainActivity extends AppCompatActivity implements ExtensionBridge.S
         btnClosePanel = findViewById(R.id.btnClosePanel);
         sidePanelWebView = findViewById(R.id.sidePanelWebView);
 
-        // Configure side panel WebView
         WebSettings spSettings = sidePanelWebView.getSettings();
         spSettings.setJavaScriptEnabled(true);
         spSettings.setDomStorageEnabled(true);
@@ -288,41 +180,24 @@ public class MainActivity extends AppCompatActivity implements ExtensionBridge.S
         spSettings.setAllowUniversalAccessFromFileURLs(true);
         spSettings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
 
-        // Register bridge on side panel too
         sidePanelWebView.addJavascriptInterface(extensionBridge, "aabBridge");
 
         sidePanelWebView.setWebViewClient(new WebViewClient() {
             @Override
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
-                // Inject shim so popup.html can use chrome.* APIs
                 extensionBridge.injectAssetScript(view, "extension/chrome-api-shim.js");
             }
         });
 
-        sidePanelWebView.setWebChromeClient(new WebChromeClient() {
-            @Override
-            public boolean onShowFileChooser(WebView webView, ValueCallback<Uri[]> filePathCallback,
-                    FileChooserParams fileChooserParams) {
-                Intent intent = fileChooserParams.createIntent();
-                try {
-                    startActivityForResult(intent, 1002);
-                } catch (Exception e) {
-                    filePathCallback.onReceiveValue(null);
-                }
-                return true;
-            }
-        });
+        sidePanelWebView.setWebChromeClient(new WebChromeClient());
 
-        // Close actions
         btnClosePanel.setOnClickListener(v -> closeSidePanel());
         sidePanelBackdrop.setOnClickListener(v -> closeSidePanel());
     }
 
-    // ─── Side Panel open/close ───
     @Override
     public void onOpenSidePanel() {
-        // Called from ExtensionBridge when chrome.sidePanel.open() is invoked
         runOnUiThread(this::openSidePanel);
     }
 
@@ -330,31 +205,19 @@ public class MainActivity extends AppCompatActivity implements ExtensionBridge.S
         if (sidePanelOpen)
             return;
         sidePanelOpen = true;
-
-        // Load popup.html
         sidePanelWebView.loadUrl(POPUP_URL);
-
-        // Show overlay
         sidePanelOverlay.setVisibility(View.VISIBLE);
 
-        // Slide in from right
         Animation slideIn = new TranslateAnimation(
-                Animation.RELATIVE_TO_SELF, 1.0f,
-                Animation.RELATIVE_TO_SELF, 0.0f,
-                Animation.RELATIVE_TO_SELF, 0.0f,
-                Animation.RELATIVE_TO_SELF, 0.0f);
+                Animation.RELATIVE_TO_SELF, 1.0f, Animation.RELATIVE_TO_SELF, 0.0f,
+                Animation.RELATIVE_TO_SELF, 0.0f, Animation.RELATIVE_TO_SELF, 0.0f);
         slideIn.setDuration(250);
         slideIn.setFillAfter(true);
         sidePanelContainer.startAnimation(slideIn);
 
-        // Fade in backdrop
         sidePanelBackdrop.setAlpha(0f);
         sidePanelBackdrop.animate().alpha(1f).setDuration(250).start();
-
-        // Highlight extension button
         btnExtension.setColorFilter(0xFF7C3AED);
-
-        Log.d(TAG, "Side panel opened ✅");
     }
 
     private void closeSidePanel() {
@@ -362,12 +225,9 @@ public class MainActivity extends AppCompatActivity implements ExtensionBridge.S
             return;
         sidePanelOpen = false;
 
-        // Slide out to right
         Animation slideOut = new TranslateAnimation(
-                Animation.RELATIVE_TO_SELF, 0.0f,
-                Animation.RELATIVE_TO_SELF, 1.0f,
-                Animation.RELATIVE_TO_SELF, 0.0f,
-                Animation.RELATIVE_TO_SELF, 0.0f);
+                Animation.RELATIVE_TO_SELF, 0.0f, Animation.RELATIVE_TO_SELF, 1.0f,
+                Animation.RELATIVE_TO_SELF, 0.0f, Animation.RELATIVE_TO_SELF, 0.0f);
         slideOut.setDuration(200);
         slideOut.setFillAfter(true);
         slideOut.setAnimationListener(new Animation.AnimationListener() {
@@ -385,61 +245,8 @@ public class MainActivity extends AppCompatActivity implements ExtensionBridge.S
             }
         });
         sidePanelContainer.startAnimation(slideOut);
-
-        // Fade out backdrop
         sidePanelBackdrop.animate().alpha(0f).setDuration(200).start();
-
-        // Reset extension button color
         btnExtension.setColorFilter(0xFF4F7FFF);
-
-        Log.d(TAG, "Side panel closed");
-    }
-
-    // ─── Content Script Injection ───
-    private void injectChromeShim(WebView view) {
-        extensionBridge.injectAssetScript(view, "extension/chrome-api-shim.js");
-    }
-
-    private void injectMatchingContentScripts(WebView view, String url) {
-        for (ContentScriptRule rule : CONTENT_SCRIPT_RULES) {
-            if (rule.matches(url)) {
-                Log.i(TAG, "Content scripts matched: " + url);
-                for (String script : rule.scripts) {
-                    extensionBridge.injectAssetScript(view, "extension/" + script);
-                    Log.d(TAG, "  Injected: " + script);
-                }
-            }
-        }
-    }
-
-    // ─── Content Script Rule ───
-    private static class ContentScriptRule {
-        final String[] patterns;
-        final String[] scripts;
-
-        ContentScriptRule(String[] matchPatterns, String[] scripts) {
-            this.patterns = matchPatterns;
-            this.scripts = scripts;
-        }
-
-        boolean matches(String url) {
-            if (url == null)
-                return false;
-            for (String pattern : patterns) {
-                String regex = pattern
-                        .replace(".", "\\.")
-                        .replace("*", ".*");
-                try {
-                    if (url.matches(regex))
-                        return true;
-                } catch (Exception e) {
-                    String prefix = pattern.replace("*", "");
-                    if (url.startsWith(prefix))
-                        return true;
-                }
-            }
-            return false;
-        }
     }
 
     // ─── URL Bar ───
@@ -461,35 +268,31 @@ public class MainActivity extends AppCompatActivity implements ExtensionBridge.S
     private void setupMenu() {
         btnMenu.setOnClickListener(v -> {
             PopupMenu popup = new PopupMenu(this, v);
-            popup.getMenu().add(0, 1, 0, "🏠 " + getString(R.string.new_tab));
+            popup.getMenu().add(0, 1, 0, "🏠 หน้าแรก");
             popup.getMenu().add(0, 2, 1, "🔄 รีเฟรช");
-            popup.getMenu().add(0, 3, 2, (desktopMode ? "✅" : "☐") + " " + getString(R.string.desktop_mode));
-            popup.getMenu().add(0, 4, 3, "🧩 " + getString(R.string.extensions));
-            popup.getMenu().add(0, 5, 4, "⚙️ " + getString(R.string.settings));
-            popup.getMenu().add(0, 6, 5, "📤 แชร์");
-            popup.getMenu().add(0, 7, 6, "🗑️ " + getString(R.string.clear_data));
+            popup.getMenu().add(0, 3, 2, "🧩 จัดการ Extension");
+            popup.getMenu().add(0, 4, 3, "⚙️ ตั้งค่า");
+            popup.getMenu().add(0, 5, 4, "📤 แชร์");
+            popup.getMenu().add(0, 6, 5, "🗑️ ล้างข้อมูล");
 
             popup.setOnMenuItemClickListener(item -> {
                 switch (item.getItemId()) {
                     case 1:
-                        loadUrl(NTP_URL);
+                        navigateActiveTab(NTP_URL);
                         return true;
                     case 2:
-                        webView.reload();
+                        tabManager.reloadActiveTab();
                         return true;
                     case 3:
-                        toggleDesktopMode();
+                        navigateActiveTab(EXT_MANAGER_URL);
                         return true;
                     case 4:
-                        loadUrl(EXT_MANAGER_URL);
+                        navigateActiveTab(SETTINGS_URL);
                         return true;
                     case 5:
-                        loadUrl(SETTINGS_URL);
-                        return true;
-                    case 6:
                         shareCurrentUrl();
                         return true;
-                    case 7:
+                    case 6:
                         clearBrowsingData();
                         return true;
                 }
@@ -509,11 +312,16 @@ public class MainActivity extends AppCompatActivity implements ExtensionBridge.S
         } else {
             url = "https://www.google.com/search?q=" + Uri.encode(input);
         }
-        loadUrl(url);
+        navigateActiveTab(url);
     }
 
-    private void loadUrl(String url) {
-        webView.loadUrl(url);
+    private void navigateActiveTab(String url) {
+        int activeId = tabManager.getActiveTabId();
+        if (activeId > 0) {
+            tabManager.updateTab(activeId, url);
+        } else {
+            tabManager.createTab(url, true);
+        }
         updateUrlBar(url);
     }
 
@@ -526,34 +334,23 @@ public class MainActivity extends AppCompatActivity implements ExtensionBridge.S
         }
     }
 
-    private void toggleDesktopMode() {
-        desktopMode = !desktopMode;
-        prefs.edit().putBoolean("desktop_mode", desktopMode).apply();
-        WebSettings settings = webView.getSettings();
-        if (desktopMode) {
-            settings.setUserAgentString(DESKTOP_UA);
-            Toast.makeText(this, "🖥️ Desktop Mode เปิด", Toast.LENGTH_SHORT).show();
-        } else {
-            settings.setUserAgentString(null);
-            Toast.makeText(this, "📱 Mobile Mode", Toast.LENGTH_SHORT).show();
-        }
-        webView.reload();
-    }
-
     private void shareCurrentUrl() {
-        String url = webView.getUrl();
-        if (url != null && !url.startsWith("file://")) {
+        WebView wv = tabManager.getActiveWebView();
+        if (wv != null && wv.getUrl() != null && !wv.getUrl().startsWith("file://")) {
             Intent share = new Intent(Intent.ACTION_SEND);
             share.setType("text/plain");
-            share.putExtra(Intent.EXTRA_TEXT, url);
+            share.putExtra(Intent.EXTRA_TEXT, wv.getUrl());
             startActivity(Intent.createChooser(share, "แชร์ลิงก์"));
         }
     }
 
     private void clearBrowsingData() {
-        webView.clearCache(true);
-        webView.clearHistory();
-        webView.clearFormData();
+        WebView wv = tabManager.getActiveWebView();
+        if (wv != null) {
+            wv.clearCache(true);
+            wv.clearHistory();
+            wv.clearFormData();
+        }
         CookieManager.getInstance().removeAllCookies(null);
         Toast.makeText(this, "🗑️ ล้างข้อมูลเรียบร้อย", Toast.LENGTH_SHORT).show();
     }
@@ -566,12 +363,23 @@ public class MainActivity extends AppCompatActivity implements ExtensionBridge.S
         urlBar.clearFocus();
     }
 
+    // ─── Foreground Service ───
+    private void startExtensionService() {
+        try {
+            Intent serviceIntent = new Intent(this, ExtensionForegroundService.class);
+            startForegroundService(serviceIntent);
+        } catch (Exception e) {
+            Log.w(TAG, "Could not start foreground service: " + e.getMessage());
+        }
+    }
+
+    // ─── Lifecycle ───
     @Override
     public void onBackPressed() {
         if (sidePanelOpen) {
             closeSidePanel();
-        } else if (webView.canGoBack()) {
-            webView.goBack();
+        } else if (tabManager.canGoBack()) {
+            tabManager.goBack();
         } else {
             super.onBackPressed();
         }
@@ -582,29 +390,33 @@ public class MainActivity extends AppCompatActivity implements ExtensionBridge.S
         super.onNewIntent(intent);
         String url = intent.getDataString();
         if (url != null && !url.isEmpty())
-            loadUrl(url);
+            navigateActiveTab(url);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        webView.onPause();
+        tabManager.pauseAll();
         CookieManager.getInstance().flush();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        webView.onResume();
+        tabManager.resumeAll();
     }
 
     @Override
     protected void onDestroy() {
+        try {
+            stopService(new Intent(this, ExtensionForegroundService.class));
+        } catch (Exception e) {
+        }
         if (backgroundEngine != null)
             backgroundEngine.destroy();
         if (sidePanelWebView != null)
             sidePanelWebView.destroy();
-        webView.destroy();
+        tabManager.destroyAll();
         super.onDestroy();
     }
 }

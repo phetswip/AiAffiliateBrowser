@@ -16,13 +16,12 @@ import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 /**
- * AiAffiliate Browser — Extension Bridge v2
- * Full Chrome Extension API bridge: storage, tabs, scripting, alarms,
- * sidePanel.
- * Supports Promise-based async APIs.
+ * AiAffiliate Browser — Extension Bridge v3
+ * Full Chrome Extension API bridge with multi-tab support via TabManager.
  */
 public class ExtensionBridge {
 
@@ -31,16 +30,20 @@ public class ExtensionBridge {
 
     private final Context context;
     private final Handler mainHandler;
-    private WebView contentWebView;
+    private WebView contentWebView; // Active content tab
     private WebView backgroundWebView;
+    private TabManager tabManager;
 
-    // Side panel callback
+    // Side panel
     private SidePanelCallback sidePanelCallback;
 
     // Alarm storage
     private final Map<String, Runnable> activeAlarms = new HashMap<>();
     private final Map<String, Long> alarmScheduledTimes = new HashMap<>();
     private final Map<String, Double> alarmPeriods = new HashMap<>();
+
+    // Track which WebView initiated each callback
+    private final Map<Integer, WebView> callbackOrigins = new HashMap<>();
 
     public interface SidePanelCallback {
         void onOpenSidePanel();
@@ -59,6 +62,10 @@ public class ExtensionBridge {
         this.backgroundWebView = webView;
     }
 
+    public void setTabManager(TabManager tm) {
+        this.tabManager = tm;
+    }
+
     public void setSidePanelCallback(SidePanelCallback cb) {
         this.sidePanelCallback = cb;
     }
@@ -67,17 +74,18 @@ public class ExtensionBridge {
     @JavascriptInterface
     public void runtimeSendMessage(String messageJson, int callbackId) {
         mainHandler.post(() -> {
+            String escaped = esc(messageJson);
+            String senderJson = "{\"id\":\"aiaffiliate-extension\",\"tab\":{\"id\":" +
+                    (tabManager != null ? tabManager.getActiveTabId() : 1) + "}}";
+            // Dispatch to background
             if (backgroundWebView != null) {
-                String escaped = esc(messageJson);
-                String senderJson = "{\"id\":\"aiaffiliate-extension\",\"tab\":{\"id\":1}}";
                 backgroundWebView.evaluateJavascript(
                         "if(window.__aab_dispatchMessage){window.__aab_dispatchMessage('" +
                                 escaped + "','" + esc(senderJson) + "')}",
                         null);
             }
-            // Also dispatch to content WebView (broadcastToSidePanel uses this)
+            // Dispatch to side panel / content
             if (contentWebView != null) {
-                String escaped = esc(messageJson);
                 contentWebView.evaluateJavascript(
                         "if(window.__aab_dispatchMessage){window.__aab_dispatchMessage('" +
                                 escaped + "','{\"id\":\"aiaffiliate-extension\"}')}",
@@ -89,57 +97,71 @@ public class ExtensionBridge {
 
     @JavascriptInterface
     public void sendMessageResponse(String responseJson) {
-        // Response handling — message cycle completed
-    }
+        /* response handled */ }
 
-    // ─── chrome.tabs.sendMessage ───
+    // ─── chrome.tabs.sendMessage (routes to specific tab) ───
     @JavascriptInterface
     public void tabsSendMessage(int tabId, String messageJson, int callbackId) {
         mainHandler.post(() -> {
-            if (contentWebView != null) {
+            if (tabManager != null) {
+                tabManager.sendMessageToTab(tabId, messageJson);
+            } else if (contentWebView != null) {
                 String escaped = esc(messageJson);
                 contentWebView.evaluateJavascript(
                         "if(window.__aab_dispatchMessage){window.__aab_dispatchMessage('" +
                                 escaped + "','{\"id\":\"aiaffiliate-extension\"}')}",
                         null);
             }
-            deliverCb(callbackId, null);
+            deliverCbOnBg(callbackId, null);
         });
     }
 
-    // ─── chrome.tabs.query ───
+    // ─── chrome.tabs.query (real tab list from TabManager) ───
     @JavascriptInterface
     public void tabsQuery(String queryJson, int callbackId) {
         mainHandler.post(() -> {
             try {
-                String url = contentWebView != null && contentWebView.getUrl() != null ? contentWebView.getUrl() : "";
-                String title = contentWebView != null && contentWebView.getTitle() != null ? contentWebView.getTitle()
-                        : "";
-
-                // Check URL filter
                 JSONObject query = new JSONObject(queryJson);
                 String urlFilter = query.optString("url", "");
+                boolean activeOnly = query.optBoolean("active", false);
 
-                if (!urlFilter.isEmpty()) {
-                    // Match URL pattern
-                    String pattern = urlFilter.replace("*", ".*");
-                    if (!url.matches(pattern)) {
-                        // No match — return empty array
-                        deliverCb(callbackId, "[]");
-                        return;
+                if (tabManager != null) {
+                    List<TabManager.TabInfo> matchedTabs = tabManager.queryTabs(urlFilter);
+                    JSONArray result = new JSONArray();
+                    for (TabManager.TabInfo tab : matchedTabs) {
+                        if (activeOnly && !tab.active)
+                            continue;
+                        JSONObject tabObj = new JSONObject();
+                        tabObj.put("id", tab.id);
+                        tabObj.put("active", tab.active);
+                        tabObj.put("url", tab.url);
+                        tabObj.put("title", tab.title);
+                        tabObj.put("windowId", 1);
+                        tabObj.put("status", tab.isLoading ? "loading" : "complete");
+                        result.put(tabObj);
                     }
+                    deliverCbOnBg(callbackId, result.toString());
+                } else {
+                    // Fallback single tab
+                    String url = contentWebView != null && contentWebView.getUrl() != null ? contentWebView.getUrl()
+                            : "";
+                    if (!urlFilter.isEmpty()) {
+                        String pattern = urlFilter.replace("*", ".*").replace(".", "\\.");
+                        if (!url.matches(pattern)) {
+                            deliverCbOnBg(callbackId, "[]");
+                            return;
+                        }
+                    }
+                    deliverCbOnBg(callbackId,
+                            "[{\"id\":1,\"active\":true,\"url\":\"" + esc(url) + "\",\"windowId\":1}]");
                 }
-
-                String tabJson = "[{\"id\":1,\"active\":true,\"url\":\"" + esc(url) +
-                        "\",\"title\":\"" + esc(title) + "\",\"windowId\":1}]";
-                deliverCb(callbackId, tabJson);
             } catch (Exception e) {
-                deliverCb(callbackId, "[]");
+                deliverCbOnBg(callbackId, "[]");
             }
         });
     }
 
-    // ─── chrome.tabs.create ───
+    // ─── chrome.tabs.create (creates real tab in TabManager) ───
     @JavascriptInterface
     public void tabsCreate(String propsJson, int callbackId) {
         mainHandler.post(() -> {
@@ -147,20 +169,20 @@ public class ExtensionBridge {
                 JSONObject props = new JSONObject(propsJson);
                 String url = props.optString("url", "");
                 boolean active = props.optBoolean("active", true);
-                if (!url.isEmpty() && contentWebView != null) {
-                    contentWebView.loadUrl(url);
-                }
-                String tabJson = "{\"id\":1,\"url\":\"" + esc(url) + "\",\"active\":" + active + ",\"windowId\":1}";
-                deliverCb(callbackId, tabJson);
 
-                // Notify tab updated listeners after load
-                if (!url.isEmpty()) {
-                    mainHandler.postDelayed(() -> {
-                        notifyTabUpdated(1, "loading", url);
-                    }, 500);
+                if (tabManager != null) {
+                    int tabId = tabManager.createTab(url, active);
+                    TabManager.TabInfo tab = tabManager.getTab(tabId);
+                    String tabJson = "{\"id\":" + tabId + ",\"url\":\"" + esc(url) +
+                            "\",\"active\":" + active + ",\"windowId\":1}";
+                    deliverCbOnBg(callbackId, tabJson);
+                } else {
+                    if (!url.isEmpty() && contentWebView != null)
+                        contentWebView.loadUrl(url);
+                    deliverCbOnBg(callbackId, "{\"id\":1,\"url\":\"" + esc(url) + "\",\"active\":true}");
                 }
             } catch (JSONException e) {
-                deliverCb(callbackId, "{\"id\":1}");
+                deliverCbOnBg(callbackId, "{\"id\":1}");
             }
         });
     }
@@ -172,14 +194,22 @@ public class ExtensionBridge {
             try {
                 JSONObject props = new JSONObject(propsJson);
                 String url = props.optString("url", "");
-                if (!url.isEmpty() && contentWebView != null) {
-                    contentWebView.loadUrl(url);
+                boolean active = props.optBoolean("active", false);
+
+                if (tabManager != null) {
+                    if (!url.isEmpty())
+                        tabManager.updateTab(tabId, url);
+                    if (active)
+                        tabManager.switchToTab(tabId);
+                    String tabJson = "{\"id\":" + tabId + ",\"url\":\"" + esc(url) + "\",\"active\":" + active + "}";
+                    deliverCbOnBg(callbackId, tabJson);
+                } else {
+                    if (!url.isEmpty() && contentWebView != null)
+                        contentWebView.loadUrl(url);
+                    deliverCbOnBg(callbackId, "{\"id\":" + tabId + "}");
                 }
-                String tabJson = "{\"id\":" + (tabId > 0 ? tabId : 1) + ",\"url\":\"" + esc(url)
-                        + "\",\"active\":true}";
-                deliverCb(callbackId, tabJson);
             } catch (JSONException e) {
-                deliverCb(callbackId, "{\"id\":" + tabId + "}");
+                deliverCbOnBg(callbackId, "{\"id\":" + tabId + "}");
             }
         });
     }
@@ -192,24 +222,35 @@ public class ExtensionBridge {
                 JSONArray ids = new JSONArray(tabIdsJson);
                 for (int i = 0; i < ids.length(); i++) {
                     int tabId = ids.getInt(i);
-                    // Since we only have one tab, just notify removal
+                    if (tabManager != null) {
+                        tabManager.removeTab(tabId);
+                    }
+                    // Notify tab removed
                     notifyTabRemoved(tabId);
                 }
             } catch (JSONException e) {
                 /* ignore */ }
-            deliverCb(callbackId, null);
+            deliverCbOnBg(callbackId, null);
         });
     }
 
-    // ─── chrome.tabs.get (async) ───
+    // ─── chrome.tabs.get ───
     @JavascriptInterface
     public void tabsGetAsync(int tabId, int callbackId) {
         mainHandler.post(() -> {
+            if (tabManager != null) {
+                TabManager.TabInfo tab = tabManager.getTab(tabId);
+                if (tab != null) {
+                    String tabJson = "{\"id\":" + tab.id + ",\"url\":\"" + esc(tab.url) +
+                            "\",\"title\":\"" + esc(tab.title) + "\",\"active\":" + tab.active +
+                            ",\"status\":\"" + (tab.isLoading ? "loading" : "complete") + "\",\"windowId\":1}";
+                    deliverCbOnBg(callbackId, tabJson);
+                    return;
+                }
+            }
             String url = contentWebView != null && contentWebView.getUrl() != null ? contentWebView.getUrl() : "";
-            String title = contentWebView != null && contentWebView.getTitle() != null ? contentWebView.getTitle() : "";
-            String tabJson = "{\"id\":" + tabId + ",\"url\":\"" + esc(url) +
-                    "\",\"title\":\"" + esc(title) + "\",\"active\":true,\"status\":\"complete\",\"windowId\":1}";
-            deliverCb(callbackId, tabJson);
+            deliverCbOnBg(callbackId,
+                    "{\"id\":" + tabId + ",\"url\":\"" + esc(url) + "\",\"active\":true,\"status\":\"complete\"}");
         });
     }
 
@@ -217,6 +258,13 @@ public class ExtensionBridge {
     @JavascriptInterface
     public void tabsReload(int tabId) {
         mainHandler.post(() -> {
+            if (tabManager != null) {
+                TabManager.TabInfo tab = tabManager.getTab(tabId);
+                if (tab != null) {
+                    tab.webView.reload();
+                    return;
+                }
+            }
             if (contentWebView != null)
                 contentWebView.reload();
         });
@@ -226,7 +274,14 @@ public class ExtensionBridge {
     @JavascriptInterface
     public void executeScript(int tabId, String code, int callbackId) {
         mainHandler.post(() -> {
-            if (contentWebView != null) {
+            if (tabManager != null) {
+                tabManager.executeScriptOnTab(tabId > 0 ? tabId : tabManager.getActiveTabId(), code, result -> {
+                    if (callbackId > 0) {
+                        String r = result != null && !result.equals("null") ? result : "null";
+                        deliverCbOnBg(callbackId, "[{\"result\":" + r + "}]");
+                    }
+                });
+            } else if (contentWebView != null) {
                 contentWebView.evaluateJavascript(code, result -> {
                     if (callbackId > 0) {
                         String r = result != null && !result.equals("null") ? result : "null";
@@ -242,10 +297,16 @@ public class ExtensionBridge {
         mainHandler.post(() -> {
             try {
                 JSONArray files = new JSONArray(filesJson);
-                for (int i = 0; i < files.length(); i++) {
-                    String file = files.getString(i);
-                    if (contentWebView != null) {
-                        injectAssetScript(contentWebView, "extension/" + file);
+                String[] fileArr = new String[files.length()];
+                for (int i = 0; i < files.length(); i++)
+                    fileArr[i] = files.getString(i);
+
+                if (tabManager != null) {
+                    tabManager.injectScriptFilesOnTab(tabId > 0 ? tabId : tabManager.getActiveTabId(), fileArr);
+                } else {
+                    for (String file : fileArr) {
+                        if (contentWebView != null)
+                            injectAssetScript(contentWebView, "extension/" + file);
                     }
                 }
             } catch (JSONException e) {
@@ -271,9 +332,8 @@ public class ExtensionBridge {
                 for (int i = 0; i < keys.length(); i++) {
                     String key = keys.getString(i);
                     String val = prefs.getString(key, null);
-                    if (val != null) {
+                    if (val != null)
                         putParsedValue(result, key, val);
-                    }
                 }
             }
             deliverCbToAll(callbackId, result.toString());
@@ -295,9 +355,10 @@ public class ExtensionBridge {
                 String key = keys.next();
                 Object value = items.get(key);
                 String oldVal = prefs.getString(key, null);
-                String newVal = value instanceof String ? (String) value : value.toString();
-                // Store objects as JSON strings
+                String newVal;
                 if (value instanceof JSONObject || value instanceof JSONArray) {
+                    newVal = value.toString();
+                } else {
                     newVal = value.toString();
                 }
                 editor.putString(key, newVal);
@@ -343,9 +404,8 @@ public class ExtensionBridge {
                 }
             }
             editor.apply();
-            if (changes.length() > 0) {
+            if (changes.length() > 0)
                 notifyStorageChanged(changes.toString());
-            }
         } catch (JSONException e) {
             /* ignore */ }
         deliverCbToAll(callbackId, null);
@@ -357,7 +417,7 @@ public class ExtensionBridge {
         deliverCbToAll(callbackId, null);
     }
 
-    // ─── chrome.browsingData.remove ───
+    // ─── chrome.browsingData ───
     @JavascriptInterface
     public void clearBrowsingData(String dataTypesJson) {
         mainHandler.post(() -> {
@@ -390,7 +450,6 @@ public class ExtensionBridge {
             final String alarmName = name;
             final double period = periodMinutes;
 
-            // Cancel existing
             alarmsClear(alarmName);
 
             Runnable alarmRunnable = new Runnable() {
@@ -400,7 +459,6 @@ public class ExtensionBridge {
                             "\",\"scheduledTime\":" + System.currentTimeMillis() + "}";
                     fireAlarm(alarmJson);
 
-                    // Repeat if periodic
                     if (period > 0) {
                         long nextDelay = (long) (period * 60000);
                         alarmScheduledTimes.put(alarmName, System.currentTimeMillis() + nextDelay);
@@ -435,9 +493,8 @@ public class ExtensionBridge {
 
     @JavascriptInterface
     public void alarmsClearAll() {
-        for (Map.Entry<String, Runnable> entry : activeAlarms.entrySet()) {
-            mainHandler.removeCallbacks(entry.getValue());
-        }
+        for (Runnable r : activeAlarms.values())
+            mainHandler.removeCallbacks(r);
         activeAlarms.clear();
         alarmScheduledTimes.clear();
         alarmPeriods.clear();
@@ -448,11 +505,9 @@ public class ExtensionBridge {
         Long scheduledTime = alarmScheduledTimes.get(name);
         if (scheduledTime != null) {
             Double period = alarmPeriods.get(name);
-            String alarmJson = "{\"name\":\"" + esc(name) +
-                    "\",\"scheduledTime\":" + scheduledTime;
-            if (period != null && period > 0) {
+            String alarmJson = "{\"name\":\"" + esc(name) + "\",\"scheduledTime\":" + scheduledTime;
+            if (period != null && period > 0)
                 alarmJson += ",\"periodInMinutes\":" + period;
-            }
             alarmJson += "}";
             deliverCbToAll(callbackId, alarmJson);
         } else {
@@ -460,61 +515,96 @@ public class ExtensionBridge {
         }
     }
 
-    // ─── chrome.sidePanel.open ───
+    // ─── chrome.sidePanel ───
     @JavascriptInterface
     public void sidePanelOpen(String optionsJson) {
         mainHandler.post(() -> {
-            if (sidePanelCallback != null) {
+            if (sidePanelCallback != null)
                 sidePanelCallback.onOpenSidePanel();
-            }
         });
     }
 
-    // ─── chrome.action.setBadgeText ───
+    // ─── chrome.action ───
     @JavascriptInterface
     public void setBadgeText(String text) {
-        // Could update UI badge
-    }
+        /* UI badge */ }
 
-    // ─── Fire onInstalled / onStartup in background ───
+    // ─── Lifecycle events ───
     public void fireOnInstalled() {
         mainHandler.postDelayed(() -> {
-            if (backgroundWebView != null) {
-                backgroundWebView.evaluateJavascript(
-                        "if(window.__aab_onInstalled){window.__aab_onInstalled()}", null);
-            }
+            if (backgroundWebView != null)
+                backgroundWebView.evaluateJavascript("if(window.__aab_onInstalled){window.__aab_onInstalled()}", null);
         }, 1000);
     }
 
     public void fireOnStartup() {
         mainHandler.postDelayed(() -> {
-            if (backgroundWebView != null) {
-                backgroundWebView.evaluateJavascript(
-                        "if(window.__aab_onStartup){window.__aab_onStartup()}", null);
-            }
+            if (backgroundWebView != null)
+                backgroundWebView.evaluateJavascript("if(window.__aab_onStartup){window.__aab_onStartup()}", null);
         }, 1500);
     }
 
-    // ─── Fire action.onClicked (called when user taps extension button) ───
-    public void fireActionClicked() {
+    // ─── Notify tab status (called by TabManager) ───
+    public void notifyTabStatus(int tabId, String status, String url) {
+        String changeInfoJson = "{\"status\":\"" + status + "\"}";
+        String tabJson = "{\"id\":" + tabId + ",\"url\":\"" + esc(url) + "\",\"status\":\"" + status + "\"}";
+        String js = "if(window.__aab_tabUpdated){window.__aab_tabUpdated(" + tabId +
+                ",'" + esc(changeInfoJson) + "','" + esc(tabJson) + "')}";
         mainHandler.post(() -> {
-            String tabJson = "{\"id\":1,\"windowId\":1,\"url\":\"" +
-                    esc(contentWebView != null && contentWebView.getUrl() != null ? contentWebView.getUrl() : "")
-                    + "\"}";
-            if (backgroundWebView != null) {
-                backgroundWebView.evaluateJavascript(
-                        "if(window.chrome&&window.chrome.action&&window.chrome.action.onClicked.hasListeners()){" +
-                                "var _listeners=[];window.chrome.action.onClicked.addListener=function(fn){_listeners.push(fn)};"
-                                +
-                                "}" +
-                // Direct dispatch via shim internal
-                                "try{var e=new CustomEvent('__aab_action_clicked');document.dispatchEvent(e)}catch(e){}",
-                        null);
-            }
+            if (backgroundWebView != null)
+                backgroundWebView.evaluateJavascript(js, null);
         });
     }
 
-    // ─── Helper: deliver callback to appropriate WebView(s) ───
+    public void notifyTabComplete(String url) {
+        notifyTabStatus(tabManager != null ? tabManager.getActiveTabId() : 1, "complete", url);
+    }
+
+    private void notifyTabRemoved(int tabId) {
+        String js = "if(window.__aab_tabRemoved){window.__aab_tabRemoved(" + tabId + ")}";
+        mainHandler.post(() -> {
+            if (backgroundWebView != null)
+                backgroundWebView.evaluateJavascript(js, null);
+        });
+    }
+
+    // ─── Notify storage change ───
+    private void notifyStorageChanged(String changesJson) {
+        mainHandler.post(() -> {
+            String escaped = esc(changesJson);
+            String js = "if(window.__aab_storageChanged){window.__aab_storageChanged('" + escaped + "','local')}";
+            if (contentWebView != null)
+                contentWebView.evaluateJavascript(js, null);
+            if (backgroundWebView != null)
+                backgroundWebView.evaluateJavascript(js, null);
+        });
+    }
+
+    // ─── Fire alarm ───
+    private void fireAlarm(String alarmJson) {
+        String js = "if(window.__aab_alarmFired){window.__aab_alarmFired('" + esc(alarmJson) + "')}";
+        mainHandler.post(() -> {
+            if (backgroundWebView != null)
+                backgroundWebView.evaluateJavascript(js, null);
+        });
+    }
+
+    // ─── Inject asset script ───
+    @SuppressLint("SetJavaScriptEnabled")
+    public void injectAssetScript(WebView webView, String assetPath) {
+        try {
+            java.io.InputStream is = context.getAssets().open(assetPath);
+            byte[] buffer = new byte[is.available()];
+            is.read(buffer);
+            is.close();
+            String code = new String(buffer, "UTF-8");
+            webView.evaluateJavascript(code, null);
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to inject " + assetPath + ": " + e.getMessage());
+        }
+    }
+
+    // ─── Callback helpers ───
     private void deliverCb(int cbId, String resultJson) {
         if (cbId <= 0)
             return;
@@ -558,71 +648,7 @@ public class ExtensionBridge {
         return "if(window.__aab_callback){window.__aab_callback(" + cbId + ",'" + esc(resultJson) + "')}";
     }
 
-    // ─── Helper: notify storage change ───
-    private void notifyStorageChanged(String changesJson) {
-        mainHandler.post(() -> {
-            String escaped = esc(changesJson);
-            String js = "if(window.__aab_storageChanged){window.__aab_storageChanged('" + escaped + "','local')}";
-            if (contentWebView != null)
-                contentWebView.evaluateJavascript(js, null);
-            if (backgroundWebView != null)
-                backgroundWebView.evaluateJavascript(js, null);
-        });
-    }
-
-    // ─── Helper: notify tab updated ───
-    private void notifyTabUpdated(int tabId, String status, String url) {
-        String changeInfoJson = "{\"status\":\"" + status + "\"}";
-        String tabJson = "{\"id\":" + tabId + ",\"url\":\"" + esc(url) + "\",\"status\":\"" + status + "\"}";
-        String js = "if(window.__aab_tabUpdated){window.__aab_tabUpdated(" + tabId +
-                ",'" + esc(changeInfoJson) + "','" + esc(tabJson) + "')}";
-        mainHandler.post(() -> {
-            if (backgroundWebView != null)
-                backgroundWebView.evaluateJavascript(js, null);
-            if (contentWebView != null)
-                contentWebView.evaluateJavascript(js, null);
-        });
-    }
-
-    public void notifyTabComplete(String url) {
-        notifyTabUpdated(1, "complete", url);
-    }
-
-    private void notifyTabRemoved(int tabId) {
-        String js = "if(window.__aab_tabRemoved){window.__aab_tabRemoved(" + tabId + ")}";
-        mainHandler.post(() -> {
-            if (backgroundWebView != null)
-                backgroundWebView.evaluateJavascript(js, null);
-        });
-    }
-
-    // ─── Helper: fire alarm ───
-    private void fireAlarm(String alarmJson) {
-        String js = "if(window.__aab_alarmFired){window.__aab_alarmFired('" + esc(alarmJson) + "')}";
-        mainHandler.post(() -> {
-            if (backgroundWebView != null)
-                backgroundWebView.evaluateJavascript(js, null);
-            if (contentWebView != null)
-                contentWebView.evaluateJavascript(js, null);
-        });
-    }
-
-    // ─── Helper: inject script from assets ───
-    @SuppressLint("SetJavaScriptEnabled")
-    public void injectAssetScript(WebView webView, String assetPath) {
-        try {
-            java.io.InputStream is = context.getAssets().open(assetPath);
-            byte[] buffer = new byte[is.available()];
-            is.read(buffer);
-            is.close();
-            String code = new String(buffer, "UTF-8");
-            webView.evaluateJavascript(code, null);
-        } catch (Exception e) {
-            Log.e(TAG, "Failed to inject " + assetPath + ": " + e.getMessage());
-        }
-    }
-
-    // ─── Helper: parse stored value ───
+    // ─── Parse stored value ───
     private void putParsedValue(JSONObject result, String key, String val) throws JSONException {
         if (val == null)
             return;
@@ -659,7 +685,7 @@ public class ExtensionBridge {
         result.put(key, val);
     }
 
-    // ─── Helper: escape for JS ───
+    // ─── Escape for JS ───
     private static String esc(String s) {
         if (s == null)
             return "";
