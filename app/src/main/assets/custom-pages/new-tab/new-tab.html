@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="light">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>แท็บใหม่ — AiAffiliate Browser</title>
+    <meta name="description"
+        content="AiAffiliate Browser — เบราว์เซอร์สำหรับ Affiliate Marketing พร้อม Extension ในตัว">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Prompt:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="new-tab.css">
+</head>
+
+<body>
+    <!-- ═══════════════════════════════════════════
+         TOP ACTION BAR
+         ═══════════════════════════════════════════ -->
+    <header class="top-bar" id="topBar">
+        <div class="top-bar-left">
+            <img src="../../assets/icons/logo.png" alt="" class="top-bar-logo" onerror="this.style.display='none'">
+            <span class="top-bar-brand">AiAffiliate</span>
+        </div>
+        <div class="top-bar-right">
+            <!-- Zoom control -->
+            <div class="zoom-control" id="zoomControl">
+                <button class="top-btn zoom-out" id="zoomOut" title="ลดขนาด">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                        stroke-linecap="round">
+                        <line x1="5" y1="12" x2="19" y2="12" />
+                    </svg>
+                </button>
+                <span class="zoom-level" id="zoomLevel">100%</span>
+                <button class="top-btn zoom-in" id="zoomIn" title="เพิ่มขนาด">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                        stroke-linecap="round">
+                        <line x1="12" y1="5" x2="12" y2="19" />
+                        <line x1="5" y1="12" x2="19" y2="12" />
+                    </svg>
+                </button>
+            </div>
+            <!-- Extensions button -->
+            <button class="top-btn top-btn-ext" id="extToggle" title="ส่วนขยาย">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <path
+                        d="M20.5 11H19V7c0-1.1-.9-2-2-2h-4V3.5C13 2.12 11.88 1 10.5 1S8 2.12 8 3.5V5H4c-1.1 0-1.99.9-1.99 2v3.8H3.5c1.49 0 2.7 1.21 2.7 2.7s-1.21 2.7-2.7 2.7H2V20c0 1.1.9 2 2 2h3.8v-1.5c0-1.49 1.21-2.7 2.7-2.7 1.49 0 2.7 1.21 2.7 2.7V22H17c1.1 0 2-.9 2-2v-4h1.5c1.38 0 2.5-1.12 2.5-2.5S21.88 11 20.5 11z" />
+                </svg>
+            </button>
+            <!-- Settings button -->
+            <button class="top-btn top-btn-settings" id="settingsToggle" title="ตั้งค่า">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="3" />
+                    <path
+                        d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                </svg>
+            </button>
+        </div>
+    </header>
+
+    <!-- ═══════════════════════════════════════════
+         MAIN NTP CONTENT
+         ═══════════════════════════════════════════ -->
+    <main class="ntp-main" id="ntpMain">
+        <!-- Logo -->
+        <div class="ntp-logo-wrap">
+            <img src="../../assets/icons/logo.png" alt="AiAffiliate Browser" class="ntp-logo"
+                onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+            <div class="ntp-logo-fallback" style="display:none">
+                <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+                    <circle cx="32" cy="32" r="30" fill="url(#lgGrad)" />
+                    <circle cx="42" cy="40" r="8" fill="url(#lgGrad2)" opacity="0.6" />
+                    <defs>
+                        <radialGradient id="lgGrad" cx="40%" cy="35%" r="55%">
+                            <stop offset="0%" stop-color="#7DD3FC" />
+                            <stop offset="50%" stop-color="#3B82F6" />
+                            <stop offset="100%" stop-color="#1E40AF" />
+                        </radialGradient>
+                        <radialGradient id="lgGrad2" cx="50%" cy="50%" r="50%">
+                            <stop offset="0%" stop-color="#BAE6FD" />
+                            <stop offset="100%" stop-color="#60A5FA" />
+                        </radialGradient>
+                    </defs>
+                </svg>
+            </div>
+        </div>
+
+        <!-- Search Bar -->
+        <form class="search-form" id="searchForm">
+            <div class="search-box">
+                <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8" />
+                    <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                </svg>
+                <input type="text" id="searchInput" class="search-input" placeholder="ค้นหาด้วย Google หรือพิมพ์ URL..."
+                    autocomplete="off">
+                <button type="submit" class="search-submit" id="searchBtn" aria-label="ค้นหา">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="5" y1="12" x2="19" y2="12" />
+                        <polyline points="12 5 19 12 12 19" />
+                    </svg>
+                </button>
+            </div>
+        </form>
+
+        <!-- Shortcuts Grid -->
+        <section class="shortcuts-section">
+            <div class="shortcuts-grid" id="shortcutsGrid">
+                <a class="shortcut" data-url="https://www.google.com">
+                    <div class="shortcut-icon-wrap">
+                        <img src="https://www.google.com/s2/favicons?domain=google.com&sz=64" alt=""
+                            class="shortcut-favicon">
+                        <span class="shortcut-fallback" style="display:none">G</span>
+                    </div>
+                    <span class="shortcut-label">Google</span>
+                </a>
+                <a class="shortcut" data-url="https://www.youtube.com">
+                    <div class="shortcut-icon-wrap">
+                        <img src="https://www.google.com/s2/favicons?domain=youtube.com&sz=64" alt=""
+                            class="shortcut-favicon">
+                        <span class="shortcut-fallback" style="display:none">Y</span>
+                    </div>
+                    <span class="shortcut-label">YouTube</span>
+                </a>
+                <a class="shortcut" data-url="https://www.tiktok.com/tiktokstudio">
+                    <div class="shortcut-icon-wrap">
+                        <img src="https://www.google.com/s2/favicons?domain=tiktok.com&sz=64" alt=""
+                            class="shortcut-favicon">
+                        <span class="shortcut-fallback" style="display:none">T</span>
+                    </div>
+                    <span class="shortcut-label">TikTok Studio</span>
+                </a>
+                <a class="shortcut" data-url="https://www.facebook.com">
+                    <div class="shortcut-icon-wrap">
+                        <img src="https://www.google.com/s2/favicons?domain=facebook.com&sz=64" alt=""
+                            class="shortcut-favicon">
+                        <span class="shortcut-fallback" style="display:none">F</span>
+                    </div>
+                    <span class="shortcut-label">Facebook</span>
+                </a>
+                <a class="shortcut" data-url="https://labs.google/fx/tools/video-fx">
+                    <div class="shortcut-icon-wrap">
+                        <img src="https://www.google.com/s2/favicons?domain=labs.google&sz=64" alt=""
+                            class="shortcut-favicon">
+                        <span class="shortcut-fallback" style="display:none">F</span>
+                    </div>
+                    <span class="shortcut-label">Google Flow</span>
+                </a>
+                <a class="shortcut" data-url="https://shopee.co.th">
+                    <div class="shortcut-icon-wrap">
+                        <img src="https://www.google.com/s2/favicons?domain=shopee.co.th&sz=64" alt=""
+                            class="shortcut-favicon">
+                        <span class="shortcut-fallback" style="display:none">S</span>
+                    </div>
+                    <span class="shortcut-label">Shopee</span>
+                </a>
+                <a class="shortcut" data-url="https://www.lazada.co.th">
+                    <div class="shortcut-icon-wrap">
+                        <img src="https://www.google.com/s2/favicons?domain=lazada.co.th&sz=64" alt=""
+                            class="shortcut-favicon">
+                        <span class="shortcut-fallback" style="display:none">L</span>
+                    </div>
+                    <span class="shortcut-label">Lazada</span>
+                </a>
+                <a class="shortcut" data-url="https://seller.tiktokglobalshop.com">
+                    <div class="shortcut-icon-wrap">
+                        <img src="https://www.google.com/s2/favicons?domain=seller.tiktokglobalshop.com&sz=64" alt=""
+                            class="shortcut-favicon">
+                        <span class="shortcut-fallback" style="display:none">T</span>
+                    </div>
+                    <span class="shortcut-label">TikTok Shop</span>
+                </a>
+                <a class="shortcut" data-url="https://affiliate.tiktok.com">
+                    <div class="shortcut-icon-wrap">
+                        <img src="https://www.google.com/s2/favicons?domain=affiliate.tiktok.com&sz=64" alt=""
+                            class="shortcut-favicon">
+                        <span class="shortcut-fallback" style="display:none">A</span>
+                    </div>
+                    <span class="shortcut-label">TikTok Affiliate</span>
+                </a>
+                <a class="shortcut" data-url="https://aistudio.google.com">
+                    <div class="shortcut-icon-wrap">
+                        <img src="https://www.google.com/s2/favicons?domain=aistudio.google.com&sz=64" alt=""
+                            class="shortcut-favicon">
+                        <span class="shortcut-fallback" style="display:none">A</span>
+                    </div>
+                    <span class="shortcut-label">AI Studio</span>
+                </a>
+            </div>
+        </section>
+
+        <!-- Recent Sites -->
+        <section class="recent-section" id="recentSection">
+            <h2 class="section-title">เข้าชมล่าสุด</h2>
+            <div class="recent-list" id="recentList">
+                <!-- Populated dynamically -->
+            </div>
+        </section>
+    </main>
+
+    <!-- ═══════════════════════════════════════════
+         EXTENSION SLIDE PANEL (from right)
+         ═══════════════════════════════════════════ -->
+    <div class="panel-backdrop" id="panelBackdrop"></div>
+
+    <aside class="slide-panel" id="extPanel">
+        <div class="panel-header">
+            <div class="panel-header-left">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" class="panel-header-icon">
+                    <path
+                        d="M20.5 11H19V7c0-1.1-.9-2-2-2h-4V3.5C13 2.12 11.88 1 10.5 1S8 2.12 8 3.5V5H4c-1.1 0-1.99.9-1.99 2v3.8H3.5c1.49 0 2.7 1.21 2.7 2.7s-1.21 2.7-2.7 2.7H2V20c0 1.1.9 2 2 2h3.8v-1.5c0-1.49 1.21-2.7 2.7-2.7 1.49 0 2.7 1.21 2.7 2.7V22H17c1.1 0 2-.9 2-2v-4h1.5c1.38 0 2.5-1.12 2.5-2.5S21.88 11 20.5 11z" />
+                </svg>
+                <h2>ส่วนขยาย</h2>
+            </div>
+            <button class="panel-close" id="closeExtPanel" aria-label="ปิด">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+            </button>
+        </div>
+        <div class="panel-body">
+            <!-- Installed Extensions -->
+            <div class="panel-section-label">ติดตั้งแล้ว</div>
+            <div class="ext-item" data-ext-id="ai-affiliate-academy">
+                <img src="../../assets/icons/logo.png" alt="" class="ext-item-icon"
+                    onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2240%22 height=%2240%22%3E%3Crect width=%2240%22 height=%2240%22 rx=%228%22 fill=%22%233B82F6%22/%3E%3Ctext x=%2250%25%22 y=%2255%25%22 font-size=%2218%22 text-anchor=%22middle%22 fill=%22white%22%3EAi%3C/text%3E%3C/svg%3E'">
+                <div class="ext-item-info">
+                    <div class="ext-item-name">Ai Affiliate Academy</div>
+                    <div class="ext-item-meta">v1.03.8 · Auto Post, Fashion Mode, Storyboard</div>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" checked data-ext-id="ai-affiliate-academy">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+
+            <div class="ext-item" data-ext-id="ublock-origin">
+                <div class="ext-item-icon ext-icon-placeholder" style="background:#800000">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
+                        <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z" />
+                    </svg>
+                </div>
+                <div class="ext-item-info">
+                    <div class="ext-item-name">uBlock Origin</div>
+                    <div class="ext-item-meta">v1.57 · บล็อกโฆษณาและ Tracker</div>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" data-ext-id="ublock-origin">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+
+            <!-- Install Section -->
+            <div class="panel-divider"></div>
+            <div class="panel-section-label">ติดตั้งส่วนขยายเพิ่ม</div>
+            <button class="panel-action-btn" id="installCrxBtn">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    <polyline points="7 10 12 15 17 10" />
+                    <line x1="12" y1="15" x2="12" y2="3" />
+                </svg>
+                เลือกไฟล์ .crx จากอุปกรณ์
+            </button>
+            <button class="panel-action-btn" id="installUrlBtn">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                    <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+                </svg>
+                ติดตั้งจาก URL
+            </button>
+            <input type="file" id="crxFileInput" accept=".crx,.zip" hidden>
+            <div class="url-input-wrap hidden" id="urlInputWrap">
+                <input type="text" class="url-input" id="urlExtInput" placeholder="วาง URL ของไฟล์ .crx...">
+                <button class="url-go-btn" id="urlExtGo">ติดตั้ง</button>
+            </div>
+        </div>
+    </aside>
+
+    <!-- ═══════════════════════════════════════════
+         SETTINGS SLIDE PANEL (from right)
+         ═══════════════════════════════════════════ -->
+    <aside class="slide-panel" id="settingsPanel">
+        <div class="panel-header">
+            <div class="panel-header-left">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round" class="panel-header-icon">
+                    <circle cx="12" cy="12" r="3" />
+                    <path
+                        d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                </svg>
+                <h2>ตั้งค่า</h2>
+            </div>
+            <button class="panel-close" id="closeSettingsPanel" aria-label="ปิด">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+            </button>
+        </div>
+        <div class="panel-body">
+            <!-- Theme -->
+            <div class="panel-section-label">ธีม</div>
+            <div class="theme-options" id="themeOptions">
+                <button class="theme-btn active" data-theme="light">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5" />
+                        <line x1="12" y1="1" x2="12" y2="3" />
+                        <line x1="12" y1="21" x2="12" y2="23" />
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+                        <line x1="1" y1="12" x2="3" y2="12" />
+                        <line x1="21" y1="12" x2="23" y2="12" />
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+                    </svg>
+                    สว่าง
+                </button>
+                <button class="theme-btn" data-theme="dark">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                    </svg>
+                    มืด
+                </button>
+                <button class="theme-btn" data-theme="auto">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+                        <line x1="8" y1="21" x2="16" y2="21" />
+                        <line x1="12" y1="17" x2="12" y2="21" />
+                    </svg>
+                    อัตโนมัติ
+                </button>
+            </div>
+
+            <div class="panel-divider"></div>
+
+            <!-- Search Engine -->
+            <div class="panel-section-label">เครื่องมือค้นหา</div>
+            <div class="settings-row">
+                <span>เครื่องมือค้นหาเริ่มต้น</span>
+                <select class="settings-select" id="searchEngineSelect">
+                    <option value="google" selected>Google</option>
+                    <option value="bing">Bing</option>
+                    <option value="duckduckgo">DuckDuckGo</option>
+                </select>
+            </div>
+
+            <div class="panel-divider"></div>
+
+            <!-- Browsing -->
+            <div class="panel-section-label">การท่องเว็บ</div>
+            <div class="settings-row">
+                <span>Desktop View</span>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="desktopViewToggle" checked>
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+
+            <div class="panel-divider"></div>
+
+            <!-- Data -->
+            <div class="panel-section-label">ข้อมูล</div>
+            <button class="panel-action-btn panel-action-danger" id="clearCacheBtn">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="3 6 5 6 21 6" />
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                </svg>
+                ล้างข้อมูลการท่องเว็บ
+            </button>
+
+            <div class="panel-divider"></div>
+
+            <!-- About -->
+            <div class="panel-section-label">เกี่ยวกับ</div>
+            <div class="about-info">
+                <div class="about-name">AiAffiliate Browser</div>
+                <div class="about-detail">v1.0.0 · Chromium 119 Engine</div>
+                <div class="about-detail">© 2026 Ai Affiliate Academy</div>
+            </div>
+        </div>
+    </aside>
+
+    <script src="new-tab.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="light">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>จัดการส่วนขยาย — AiAffiliate Browser</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Prompt:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="../new-tab/new-tab.css">
+    <link rel="stylesheet" href="extension-manager.css">
+</head>
+
+<body>
+    <div class="mesh-bg">
+        <div class="mesh-orb mesh-orb-1"></div>
+        <div class="mesh-orb mesh-orb-2"></div>
+    </div>
+
+    <div class="em-container">
+        <!-- Header -->
+        <header class="em-header">
+            <button class="em-back-btn" id="backBtn" aria-label="กลับ">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="15 18 9 12 15 6" />
+                </svg>
+            </button>
+            <h1 class="em-title">จัดการส่วนขยาย</h1>
+            <div class="em-header-spacer"></div>
+        </header>
+
+        <!-- Extension List -->
+        <div class="em-list" id="extensionList">
+            <!-- Pre-bundled extension -->
+            <div class="em-card em-card-featured" data-ext-id="ai-affiliate-academy">
+                <div class="em-card-icon em-icon-gradient">
+                    <span>Ai</span>
+                </div>
+                <div class="em-card-info">
+                    <div class="em-card-name">Ai Affiliate Academy</div>
+                    <div class="em-card-meta">
+                        <span class="em-badge em-badge-active">Active</span>
+                        <span class="em-card-version">v1.03.8</span>
+                    </div>
+                    <div class="em-card-desc">ระบบอัตโนมัติสำหรับ TikTok + Affiliate</div>
+                </div>
+                <div class="em-card-actions">
+                    <label class="em-toggle">
+                        <input type="checkbox" checked data-ext-id="ai-affiliate-academy">
+                        <span class="em-toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Other extensions will be added dynamically -->
+        </div>
+
+        <!-- Install section -->
+        <div class="em-install-section">
+            <h2 class="em-section-title">ติดตั้งส่วนขยายใหม่</h2>
+
+            <div class="em-install-methods">
+                <!-- CRX File -->
+                <button class="em-install-btn" id="installCrxBtn">
+                    <div class="em-install-icon">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                            <polyline points="14 2 14 8 20 8" />
+                            <line x1="12" y1="18" x2="12" y2="12" />
+                            <polyline points="9 15 12 12 15 15" />
+                        </svg>
+                    </div>
+                    <div class="em-install-text">
+                        <span class="em-install-label">เลือกไฟล์ .crx</span>
+                        <span class="em-install-hint">จากเครื่อง</span>
+                    </div>
+                </button>
+
+                <!-- URL Install -->
+                <button class="em-install-btn" id="installUrlBtn">
+                    <div class="em-install-icon">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+                        </svg>
+                    </div>
+                    <div class="em-install-text">
+                        <span class="em-install-label">ติดตั้งจาก URL</span>
+                        <span class="em-install-hint">วางลิงก์ .crx</span>
+                    </div>
+                </button>
+            </div>
+
+            <!-- URL Input (hidden by default) -->
+            <div class="em-url-input-wrap hidden" id="urlInputWrap">
+                <div class="em-url-glass">
+                    <input type="url" id="urlInput" class="em-url-input" placeholder="วาง URL ของไฟล์ .crx ที่นี่...">
+                    <button class="em-url-go" id="urlGoBtn">ติดตั้ง</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hidden file input -->
+        <input type="file" id="crxFileInput" accept=".crx,.zip" style="display:none">
+
+        <!-- Empty state -->
+        <div class="em-empty hidden" id="emptyState">
+            <div class="em-empty-icon">🧩</div>
+            <p class="em-empty-text">ยังไม่มีส่วนขยายเพิ่มเติม</p>
+            <p class="em-empty-hint">กดปุ่มด้านบนเพื่อติดตั้ง</p>
+        </div>
+    </div>
+
+    <!-- Bottom nav (same as NTP) -->
+    <nav class="bottom-nav" id="bottomNav">
+        <button class="nav-item" data-action="home" aria-label="หน้าหลัก">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                <polyline points="9 22 9 12 15 12 15 22" />
+            </svg>
+            <span>หน้าหลัก</span>
+        </button>
+        <button class="nav-item" data-action="tabs">
+            <div class="tab-count-badge">1</div>
+            <span>แท็บ</span>
+        </button>
+        <button class="nav-item active" data-action="extensions">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path
+                    d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
+            </svg>
+            <span>ส่วนขยาย</span>
+        </button>
+        <button class="nav-item" data-action="settings">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3" />
+                <path
+                    d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+            </svg>
+            <span>ตั้งค่า</span>
+        </button>
+    </nav>
+
+    <script src="extension-manager.js"></script>
+</body>
+
+</html>

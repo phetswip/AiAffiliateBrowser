@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">AiAffiliate Browser</string>
+    <string name="app_short_name">AiAffiliate</string>
+    <string name="search_hint">ค้นหา หรือพิมพ์ URL</string>
+    <string name="new_tab">แท็บใหม่</string>
+    <string name="settings">ตั้งค่า</string>
+    <string name="extensions">ส่วนขยาย</string>
+    <string name="downloads">ดาวน์โหลด</string>
+    <string name="desktop_mode">เดสก์ท็อป</string>
+    <string name="clear_data">ล้างข้อมูล</string>
+</resources>

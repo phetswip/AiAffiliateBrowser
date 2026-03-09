@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="light">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Side Panel — AiAffiliate Browser</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Prompt:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="../new-tab/new-tab.css">
+    <link rel="stylesheet" href="side-panel.css">
+</head>
+
+<body>
+    <!-- 
+    Side Panel System for AiAffiliate Browser
+    ============================================
+    This layout manages the dual-pane viewing:
+    - Left: Main webpage (WebView)
+    - Right: Extension panel (WebView)
+    
+    3 Modes:
+    1. SLIDE  - Panel slides in from right, overlays content
+    2. SPLIT  - Side-by-side, resizable divider
+    3. FULL   - Extension takes full screen
+  -->
+
+    <div class="sp-layout" id="spLayout" data-mode="hidden">
+        <!-- Main Web Content Area -->
+        <div class="sp-main" id="spMain">
+            <div class="sp-main-placeholder">
+                <p>🌐 พื้นที่แสดงเว็บไซต์</p>
+                <p class="sp-hint">เว็บจะแสดงใน Desktop View</p>
+            </div>
+            <!-- In production, this will be replaced by the actual WebView -->
+        </div>
+
+        <!-- Resizable Divider -->
+        <div class="sp-divider" id="spDivider" role="separator" aria-orientation="vertical">
+            <div class="sp-divider-handle">
+                <div class="sp-divider-dots">
+                    <span></span><span></span><span></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Extension Panel -->
+        <div class="sp-panel" id="spPanel">
+            <!-- Panel Header -->
+            <div class="sp-panel-header">
+                <div class="sp-panel-brand">
+                    <div class="sp-panel-icon">Ai</div>
+                    <div class="sp-panel-title-group">
+                        <span class="sp-panel-name">Ai Affiliate Academy</span>
+                        <span class="sp-panel-version">v1.03.8</span>
+                    </div>
+                </div>
+                <div class="sp-panel-controls">
+                    <!-- Pin/Unpin (toggle between slide ↔ split) -->
+                    <button class="sp-ctrl-btn" id="pinBtn" data-tooltip="ตรึงข้างจอ" aria-label="ตรึง">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="12" y1="17" x2="12" y2="22" />
+                            <path
+                                d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24z" />
+                        </svg>
+                    </button>
+                    <!-- Fullscreen -->
+                    <button class="sp-ctrl-btn" id="fullscreenBtn" data-tooltip="เต็มจอ" aria-label="เต็มจอ">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="15 3 21 3 21 9" />
+                            <polyline points="9 21 3 21 3 15" />
+                            <line x1="21" y1="3" x2="14" y2="10" />
+                            <line x1="3" y1="21" x2="10" y2="14" />
+                        </svg>
+                    </button>
+                    <!-- Close -->
+                    <button class="sp-ctrl-btn sp-ctrl-close" id="closeBtn" data-tooltip="ปิด" aria-label="ปิด">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18" />
+                            <line x1="6" y1="6" x2="18" y2="18" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Extension Content (WebView in production) -->
+            <div class="sp-panel-content" id="spPanelContent">
+                <!-- Extension tabs (mirrors desktop tab bar) -->
+                <div class="sp-ext-tabs" id="extTabs">
+                    <button class="sp-ext-tab active" data-tab="auto-ultra">Auto Ultra</button>
+                    <button class="sp-ext-tab" data-tab="fashion">Fashion</button>
+                    <button class="sp-ext-tab" data-tab="storyboard">Storyboard</button>
+                    <button class="sp-ext-tab" data-tab="comment">Comment Bot</button>
+                    <button class="sp-ext-tab" data-tab="scraper">Scraper</button>
+                </div>
+
+                <!-- Extension body placeholder -->
+                <div class="sp-ext-body" id="extBody">
+                    <div class="sp-ext-placeholder">
+                        <div class="sp-ext-placeholder-icon">🚀</div>
+                        <h3>Auto Ultra Mode</h3>
+                        <p>Extension UI จะแสดงที่นี่</p>
+                        <p class="sp-hint">ทำงานได้เหมือนบน PC ทุกประการ</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mode indicator (dev) -->
+    <div class="sp-mode-indicator" id="modeIndicator">
+        <span id="modeLabel">Hidden</span>
+    </div>
+
+    <!-- Demo controls (will be integrated into bottom nav in production) -->
+    <div class="sp-demo-controls">
+        <button class="sp-demo-btn" data-mode="slide">📥 Slide Panel</button>
+        <button class="sp-demo-btn" data-mode="split">⬛ Split View</button>
+        <button class="sp-demo-btn" data-mode="full">🔲 Full Panel</button>
+        <button class="sp-demo-btn" data-mode="hidden">❌ Hide</button>
+    </div>
+
+    <script src="side-panel.js"></script>
+</body>
+
+</html>

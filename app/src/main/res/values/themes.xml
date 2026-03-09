@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Base theme – Material3 Dark -->
+    <style name="Theme.AiAffiliateBrowser" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">#4F7FFF</item>
+        <item name="colorPrimaryDark">#1A1B2E</item>
+        <item name="colorAccent">#7C3AED</item>
+        <item name="android:windowBackground">#0F1019</item>
+        <item name="android:statusBarColor">#0F1019</item>
+        <item name="android:navigationBarColor">#0F1019</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+
+    <!-- Splash/Launch theme -->
+    <style name="Theme.AiAffiliateBrowser.Splash" parent="Theme.AiAffiliateBrowser">
+        <item name="android:windowBackground">@drawable/splash_background</item>
+    </style>
+</resources>

@@ -1,0 +1,425 @@
+/* ═══════════════════════════════════════════
+   Side Panel — Layout & Modes
+   Slide | Split | Full
+   ═══════════════════════════════════════════ */
+
+/* ─── Layout Container ─── */
+.sp-layout {
+    display: flex;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    position: relative;
+}
+
+/* ─── Main Web Area ─── */
+.sp-main {
+    flex: 1;
+    min-width: 0;
+    background: var(--bg-primary);
+    overflow: auto;
+    transition: flex 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sp-main-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--text-tertiary);
+    font-family: var(--font-thai);
+    font-size: 18px;
+    gap: 8px;
+}
+
+.sp-hint {
+    font-size: 13px;
+    color: var(--text-tertiary);
+    opacity: 0.7;
+}
+
+/* ─── Divider ─── */
+.sp-divider {
+    width: 0;
+    flex-shrink: 0;
+    position: relative;
+    cursor: col-resize;
+    z-index: 10;
+    display: none;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.sp-divider-handle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 24px;
+    height: 48px;
+    background: var(--bg-glass);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+}
+
+.sp-divider:hover .sp-divider-handle,
+.sp-divider:active .sp-divider-handle {
+    background: var(--accent);
+    border-color: var(--accent);
+    box-shadow: 0 0 12px var(--accent-glow);
+}
+
+.sp-divider-dots {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.sp-divider-dots span {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--text-tertiary);
+}
+
+.sp-divider:hover .sp-divider-dots span,
+.sp-divider:active .sp-divider-dots span {
+    background: white;
+}
+
+/* ─── Extension Panel ─── */
+.sp-panel {
+    width: 0;
+    flex-shrink: 0;
+    overflow: hidden;
+    background: var(--bg-primary);
+    display: flex;
+    flex-direction: column;
+    transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+        opacity 0.3s ease,
+        transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity: 0;
+    border-left: 1px solid var(--glass-border);
+}
+
+/* ─── Panel Header ─── */
+.sp-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 14px;
+    background: var(--bg-glass);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border-bottom: 1px solid var(--glass-border);
+    flex-shrink: 0;
+}
+
+.sp-panel-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.sp-panel-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: var(--accent-gradient);
+    color: white;
+    font-family: var(--font-sans);
+    font-size: 12px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 6px var(--accent-glow);
+}
+
+.sp-panel-name {
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    display: block;
+}
+
+.sp-panel-version {
+    font-size: 10px;
+    color: var(--text-tertiary);
+}
+
+.sp-panel-controls {
+    display: flex;
+    gap: 4px;
+}
+
+.sp-ctrl-btn {
+    width: 30px;
+    height: 30px;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.sp-ctrl-btn:hover {
+    background: var(--accent-glow);
+    color: var(--accent);
+}
+
+.sp-ctrl-close:hover {
+    background: rgba(239, 68, 68, 0.12);
+    color: #EF4444;
+}
+
+/* ─── Extension Tabs (mirrors desktop) ─── */
+.sp-ext-tabs {
+    display: flex;
+    gap: 2px;
+    padding: 8px 10px;
+    overflow-x: auto;
+    flex-shrink: 0;
+    background: var(--bg-glass);
+    border-bottom: 1px solid var(--glass-border);
+    scrollbar-width: none;
+}
+
+.sp-ext-tabs::-webkit-scrollbar {
+    display: none;
+}
+
+.sp-ext-tab {
+    padding: 8px 14px;
+    border: none;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--text-secondary);
+    font-family: var(--font-sans);
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.sp-ext-tab:hover {
+    background: var(--accent-glow);
+    color: var(--accent);
+}
+
+.sp-ext-tab.active {
+    background: var(--accent);
+    color: white;
+    box-shadow: 0 2px 8px var(--accent-glow);
+}
+
+/* ─── Extension Body ─── */
+.sp-ext-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+}
+
+.sp-ext-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    text-align: center;
+    gap: 8px;
+}
+
+.sp-ext-placeholder-icon {
+    font-size: 40px;
+    margin-bottom: 8px;
+}
+
+.sp-ext-placeholder h3 {
+    font-family: var(--font-sans);
+    font-size: 16px;
+    color: var(--text-primary);
+}
+
+.sp-ext-placeholder p {
+    font-family: var(--font-thai);
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+/* ═══════════════════════════════════════
+   MODE STATES
+   ═══════════════════════════════════════ */
+
+/* ─── Hidden ─── */
+[data-mode="hidden"] .sp-panel {
+    width: 0;
+    opacity: 0;
+}
+
+[data-mode="hidden"] .sp-divider {
+    display: none;
+}
+
+/* ─── Slide Mode (overlay from right) ─── */
+[data-mode="slide"] {
+    position: relative;
+}
+
+[data-mode="slide"] .sp-main {
+    flex: 1;
+}
+
+[data-mode="slide"] .sp-panel {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 85vw;
+    max-width: 420px;
+    opacity: 1;
+    box-shadow: -8px 0 32px rgba(0, 0, 0, 0.15);
+    z-index: 50;
+}
+
+[data-mode="slide"] .sp-divider {
+    display: none;
+}
+
+/* Backdrop overlay when slide is open */
+[data-mode="slide"]::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.3);
+    z-index: 40;
+    animation: fadeIn 0.3s ease;
+}
+
+[data-mode="slide"] .sp-main {
+    pointer-events: auto;
+}
+
+/* ─── Split Mode (side-by-side, resizable) ─── */
+[data-mode="split"] .sp-main {
+    flex: 6;
+    /* 60% */
+}
+
+[data-mode="split"] .sp-panel {
+    flex: 4;
+    /* 40% */
+    width: auto;
+    opacity: 1;
+}
+
+[data-mode="split"] .sp-divider {
+    display: block;
+    width: 12px;
+}
+
+/* ─── Full Mode (extension fullscreen) ─── */
+[data-mode="full"] .sp-main {
+    flex: 0;
+    width: 0;
+    overflow: hidden;
+}
+
+[data-mode="full"] .sp-panel {
+    flex: 1;
+    width: 100%;
+    opacity: 1;
+}
+
+[data-mode="full"] .sp-divider {
+    display: none;
+}
+
+/* ─── Animations ─── */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+/* ─── Mode Indicator (dev only) ─── */
+.sp-mode-indicator {
+    position: fixed;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg-glass);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    padding: 6px 18px;
+    font-family: var(--font-sans);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent);
+    z-index: 200;
+    box-shadow: var(--glass-shadow);
+}
+
+/* ─── Demo Controls (dev only) ─── */
+.sp-demo-controls {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 8px;
+    z-index: 200;
+}
+
+.sp-demo-btn {
+    padding: 10px 16px;
+    background: var(--bg-glass);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    font-family: var(--font-thai);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: var(--glass-shadow);
+}
+
+.sp-demo-btn:hover {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+}
+
+/* ─── Panel content scrollbar ─── */
+.sp-panel-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}

@@ -1,0 +1,138 @@
+name: Build AiAffiliate Browser APK
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      build_type:
+        description: 'Build type'
+        required: true
+        default: 'release'
+        type: choice
+        options:
+          - debug
+          - release
+
+jobs:
+  build:
+    name: Build APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Copy custom pages to assets
+        run: |
+          ASSETS="app/src/main/assets/custom-pages"
+          mkdir -p "$ASSETS"
+          if [ -d "custom-pages" ]; then
+            cp -R custom-pages/* "$ASSETS/"
+            echo "✅ Custom pages copied"
+          fi
+
+      - name: Copy branding icons
+        run: |
+          BRANDING="branding"
+          if [ -d "$BRANDING" ]; then
+            for DPI in mdpi hdpi xhdpi xxhdpi xxxhdpi; do
+              SRC="$BRANDING/mipmap-$DPI"
+              DEST="app/src/main/res/mipmap-$DPI"
+              if [ -d "$SRC" ]; then
+                mkdir -p "$DEST"
+                cp "$SRC"/*.png "$DEST/"
+              fi
+            done
+            if [ -f "$BRANDING/splash_logo.png" ]; then
+              cp "$BRANDING/splash_logo.png" app/src/main/res/drawable/
+            fi
+            echo "✅ Branding icons copied"
+          fi
+
+      - name: Generate keystore
+        run: |
+          keytool -genkeypair \
+            -alias aiaffiliate \
+            -keyalg RSA \
+            -keysize 2048 \
+            -validity 10000 \
+            -storepass AiAffiliate2026 \
+            -keypass AiAffiliate2026 \
+            -dname "CN=AiAffiliate Browser, OU=Dev, O=AiAffiliate, L=Bangkok, S=Bangkok, C=TH" \
+            -keystore release-key.jks
+
+      - name: Build Release APK
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleRelease
+
+      - name: Sign APK
+        run: |
+          BUILD_TOOLS=$(ls -d $ANDROID_HOME/build-tools/*/ | tail -1)
+          APK_IN=$(find app/build -name "*-release-unsigned.apk" | head -1)
+          APK_ALIGNED="app/build/outputs/apk/release/AiAffiliateBrowser-aligned.apk"
+          APK_SIGNED="app/build/outputs/apk/release/AiAffiliateBrowser-v1.5.0-signed.apk"
+
+          if [ -n "$APK_IN" ]; then
+            ${BUILD_TOOLS}zipalign -v 4 "$APK_IN" "$APK_ALIGNED"
+            ${BUILD_TOOLS}apksigner sign \
+              --ks release-key.jks \
+              --ks-pass pass:AiAffiliate2026 \
+              --key-pass pass:AiAffiliate2026 \
+              --out "$APK_SIGNED" \
+              "$APK_ALIGNED"
+            echo "✅ APK signed: $APK_SIGNED"
+          else
+            echo "⚠️ No unsigned APK found, using default output"
+            APK_SIGNED=$(find app/build -name "*.apk" | head -1)
+          fi
+          echo "SIGNED_APK=$APK_SIGNED" >> $GITHUB_ENV
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: AiAffiliateBrowser-v1.5.0
+          path: |
+            app/build/outputs/apk/release/*signed*.apk
+            app/build/outputs/apk/release/*.apk
+            app/build/outputs/apk/debug/*.apk
+
+      - name: Create Release
+        if: inputs.build_type == 'release' || github.event_name == 'push'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.5.0
+          name: "AiAffiliate Browser v1.5.0"
+          draft: true
+          generate_release_notes: true
+          files: |
+            app/build/outputs/apk/release/*signed*.apk
+            app/build/outputs/apk/release/*.apk
+          body: |
+            ## AiAffiliate Browser v1.5.0
+
+            ### ✨ คุณสมบัติ
+            - 🎨 Liquid Glass UI (ธีมฟ้า-ขาว / มืด)
+            - 🖥️ Desktop View เป็นค่าเริ่มต้น
+            - 🧩 Extension Manager
+            - 📦 Ai Affiliate Academy ฝังมาพร้อม
+            - ⬇️ Download Manager
+            - 🔄 Pull-to-Refresh
+            - 🇹🇭 รองรับภาษาไทย
+
+            ### 📱 วิธีติดตั้ง
+            1. ดาวน์โหลด APK
+            2. เปิดไฟล์บน Android
+            3. อนุญาตติดตั้งจากแหล่งที่ไม่รู้จัก
+            4. เปิดแอพ → พร้อมใช้!
