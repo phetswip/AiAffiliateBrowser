@@ -253,6 +253,8 @@ public class TabManager {
         tabs.put(tabId, tabInfo);
 
         if (active) {
+            // Must add to container BEFORE switching
+            container.addView(wv);
             switchToTab(tabId);
         } else {
             // Background tab: add hidden to container with 0 size
