@@ -32,6 +32,8 @@ jobs:
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: '8.5'
 
       - name: Copy custom pages to assets
         run: |
@@ -73,18 +75,17 @@ jobs:
             -keystore release-key.jks
 
       - name: Build Release APK
-        run: |
-          chmod +x gradlew
-          ./gradlew assembleRelease
+        run: gradle assembleRelease
 
       - name: Sign APK
         run: |
           BUILD_TOOLS=$(ls -d $ANDROID_HOME/build-tools/*/ | tail -1)
-          APK_IN=$(find app/build -name "*-release-unsigned.apk" | head -1)
+          APK_IN=$(find app/build -name "*-release-unsigned.apk" -o -name "*-release.apk" | head -1)
           APK_ALIGNED="app/build/outputs/apk/release/AiAffiliateBrowser-aligned.apk"
           APK_SIGNED="app/build/outputs/apk/release/AiAffiliateBrowser-v1.5.0-signed.apk"
 
           if [ -n "$APK_IN" ]; then
+            mkdir -p app/build/outputs/apk/release/
             ${BUILD_TOOLS}zipalign -v 4 "$APK_IN" "$APK_ALIGNED"
             ${BUILD_TOOLS}apksigner sign \
               --ks release-key.jks \
@@ -94,8 +95,8 @@ jobs:
               "$APK_ALIGNED"
             echo "✅ APK signed: $APK_SIGNED"
           else
-            echo "⚠️ No unsigned APK found, using default output"
-            APK_SIGNED=$(find app/build -name "*.apk" | head -1)
+            echo "⚠️ No unsigned APK found"
+            find app/build -name "*.apk" 2>/dev/null || echo "No APK files found"
           fi
           echo "SIGNED_APK=$APK_SIGNED" >> $GITHUB_ENV
 
@@ -104,9 +105,7 @@ jobs:
         with:
           name: AiAffiliateBrowser-v1.5.0
           path: |
-            app/build/outputs/apk/release/*signed*.apk
-            app/build/outputs/apk/release/*.apk
-            app/build/outputs/apk/debug/*.apk
+            app/build/outputs/apk/**/*.apk
 
       - name: Create Release
         if: inputs.build_type == 'release' || github.event_name == 'push'
@@ -117,8 +116,7 @@ jobs:
           draft: true
           generate_release_notes: true
           files: |
-            app/build/outputs/apk/release/*signed*.apk
-            app/build/outputs/apk/release/*.apk
+            app/build/outputs/apk/**/*.apk
           body: |
             ## AiAffiliate Browser v1.5.0
 
