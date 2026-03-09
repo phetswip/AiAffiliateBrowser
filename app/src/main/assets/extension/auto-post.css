@@ -1,0 +1,783 @@
+/* © 2026 YumYum Thailand Co., Ltd. — PROTECTED — Do NOT reverse engineer */
+
+:root {
+    --bg-deep: #060a14;
+    --bg-card: rgba(12, 18, 35, 0.65);
+    --bg-input: rgba(8, 14, 28, 0.8);
+    --border-subtle: rgba(80, 140, 255, 0.08);
+    --border-focus: rgba(80, 140, 255, 0.3);
+    --text-primary: rgba(255, 255, 255, 0.95);
+    --text-secondary: rgba(255, 255, 255, 0.55);
+    --text-muted: rgba(255, 255, 255, 0.35);
+    --accent-blue: #508cff;
+    --accent-bright: #60a5fa;
+    --accent-orange: #f59e0b;
+    --accent-red: #ef4444;
+    --accent-pink: #ec4899;
+    --accent-green: #22c55e;
+    --accent-purple: #a78bfa;
+    --shadow-card: 0 4px 24px rgba(0,0,0,0.3), 0 0 0 1px rgba(80,140,255,0.06);
+    --radius-card: 16px;
+    --radius-input: 10px;
+    --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg-deep);
+    color: var(--text-primary);
+    padding: 12px;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+.yum-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-card);
+    padding: 16px;
+    margin-bottom: 12px;
+    box-shadow: var(--shadow-card);
+    backdrop-filter: blur(20px);
+    position: relative;
+}
+.yum-card-glow {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(80,140,255,0.15), transparent);
+    border-radius: var(--radius-card) var(--radius-card) 0 0;
+    pointer-events: none;
+}
+
+.yum-step-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+.yum-step-row h3 {
+    font-size: 14px;
+    font-weight: 600;
+}
+.yum-sub {
+    font-weight: 400;
+    color: var(--text-muted);
+    font-size: 12px;
+}
+
+.yum-badge {
+    width: 28px; height: 28px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent-orange), var(--accent-red));
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+.yum-badge-blue  { background: linear-gradient(135deg, var(--accent-blue), #3b6ce7); }
+.yum-badge-green { background: linear-gradient(135deg, var(--accent-green), #15803d); }
+.yum-badge-purple { background: linear-gradient(135deg, var(--accent-purple), #7c3aed); }
+
+.yum-mode-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+}
+.yum-mode-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 14px 8px 12px;
+    border-radius: 12px;
+    border: 1.5px solid var(--border-subtle);
+    background: rgba(8, 14, 28, 0.5);
+    cursor: pointer;
+    transition: all var(--transition);
+    text-align: center;
+}
+.yum-mode-card:hover {
+    border-color: rgba(80, 140, 255, 0.2);
+    background: rgba(80, 140, 255, 0.06);
+}
+.yum-mode-card input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    width: 0; height: 0;
+}
+.yum-mode-card:has(input:checked) {
+    border-color: var(--accent-blue);
+    background: rgba(80, 140, 255, 0.12);
+    box-shadow: 0 0 16px rgba(80, 140, 255, 0.12), inset 0 0 0 1px rgba(80, 140, 255, 0.15);
+}
+.yum-mode-icon {
+    font-size: 22px;
+    margin-bottom: 6px;
+    filter: grayscale(0.3);
+    transition: filter var(--transition);
+}
+.yum-mode-card:has(input:checked) .yum-mode-icon { filter: grayscale(0); }
+.yum-mode-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 2px;
+}
+.yum-mode-desc {
+    font-size: 10px;
+    color: var(--text-muted);
+    line-height: 1.3;
+}
+
+.yum-toggle-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+.yum-toggle-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background var(--transition);
+}
+.yum-toggle-item:hover {
+    background: rgba(80, 140, 255, 0.05);
+}
+.yum-toggle-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.yum-toggle-emoji { font-size: 18px; flex-shrink: 0; }
+.yum-toggle-title { font-size: 13px; font-weight: 500; }
+.yum-toggle-desc  { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+
+.yum-switch {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 42px; height: 24px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 12px;
+    position: relative;
+    cursor: pointer;
+    transition: background 0.3s;
+    flex-shrink: 0;
+}
+.yum-switch::after {
+    content: '';
+    position: absolute;
+    top: 2px; left: 2px;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: #fff;
+    transition: transform 0.3s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+.yum-switch:checked {
+    background: linear-gradient(135deg, var(--accent-blue), #3b82f6);
+}
+.yum-switch:checked::after {
+    transform: translateX(18px);
+}
+
+.yum-field {
+    margin-bottom: 10px;
+}
+.yum-field label {
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-bottom: 5px;
+}
+
+.yum-input, .yum-select {
+    width: 100%;
+    padding: 9px 12px;
+    border-radius: var(--radius-input);
+    border: 1px solid var(--border-subtle);
+    background: var(--bg-input);
+    color: var(--text-primary);
+    font-size: 12px;
+    font-family: inherit;
+    transition: border-color var(--transition);
+}
+.yum-input:focus, .yum-select:focus {
+    outline: none;
+    border-color: var(--border-focus);
+}
+.yum-input::placeholder { color: var(--text-muted); }
+
+input[type="date"].yum-input {
+    color-scheme: dark;
+    position: relative;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='4' width='18' height='18' rx='2' ry='2'/%3E%3Cline x1='16' y1='2' x2='16' y2='6'/%3E%3Cline x1='8' y1='2' x2='8' y2='6'/%3E%3Cline x1='3' y1='10' x2='21' y2='10'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 18px 18px;
+    padding-right: 38px;
+}
+input[type="date"].yum-input::-webkit-calendar-picker-indicator {
+    opacity: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 40px;
+    height: 100%;
+    cursor: pointer;
+}
+
+.yum-inline {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.yum-sep {
+    color: var(--text-muted);
+    font-size: 14px;
+}
+.yum-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border-subtle), transparent);
+    margin: 14px 0;
+}
+
+.yum-chip {
+    padding: 7px 14px;
+    border-radius: 8px;
+    border: none;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    white-space: nowrap;
+    transition: opacity var(--transition), transform 0.1s;
+}
+.yum-chip:hover { opacity: 0.88; }
+.yum-chip:active { transform: scale(0.96); }
+.yum-chip-blue   { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+.yum-chip-purple { background: linear-gradient(135deg, #a78bfa, #7c3aed); }
+.yum-chip-green  { background: linear-gradient(135deg, #22c55e, #16a34a); }
+.yum-chip-pink   { background: linear-gradient(135deg, #ec4899, #be185d); }
+
+.yum-quickfill {
+    background: rgba(80, 140, 255, 0.04);
+    border: 1px solid rgba(80, 140, 255, 0.1);
+    border-radius: 12px;
+    padding: 12px;
+    margin-bottom: 12px;
+}
+.yum-quickfill-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent-bright);
+    margin-bottom: 8px;
+}
+
+.yum-btn-accent {
+    width: 100%;
+    padding: 10px;
+    border-radius: 10px;
+    border: none;
+    background: linear-gradient(135deg, var(--accent-pink), #be185d);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: opacity var(--transition);
+}
+.yum-btn-accent:hover { opacity: 0.9; }
+
+.yum-btn-ghost {
+    width: 100%;
+    padding: 10px;
+    margin-top: 8px;
+    border-radius: 10px;
+    border: 1px dashed rgba(80, 140, 255, 0.2);
+    background: transparent;
+    color: var(--accent-blue);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background var(--transition), border-color var(--transition);
+}
+.yum-btn-ghost:hover {
+    background: rgba(80, 140, 255, 0.06);
+    border-color: rgba(80, 140, 255, 0.35);
+}
+
+.yum-icon-btn {
+    width: 30px; height: 30px;
+    border-radius: 8px;
+    border: 1px solid var(--border-subtle);
+    background: rgba(8, 14, 28, 0.5);
+    color: var(--text-primary);
+    font-size: 13px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: border-color var(--transition), background var(--transition);
+}
+.yum-icon-btn:hover {
+    border-color: var(--accent-blue);
+    background: rgba(80, 140, 255, 0.12);
+}
+
+.yum-btn-start {
+    width: 100%;
+    padding: 15px;
+    border-radius: 14px;
+    border: none;
+    background: linear-gradient(135deg, #059669, #047857, #065f46);
+    color: #fff;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    margin-bottom: 12px;
+    transition: all var(--transition);
+    box-shadow: 0 4px 20px rgba(5, 150, 105, 0.2);
+    letter-spacing: 0.3px;
+}
+.yum-btn-start:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 28px rgba(5, 150, 105, 0.3);
+}
+.yum-btn-start:active:not(:disabled) { transform: scale(0.99); }
+.yum-btn-start:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.yum-btn-reset {
+    margin-left: auto;
+    padding: 6px 14px;
+    border-radius: 8px;
+    border: 1px solid rgba(245, 158, 11, 0.25);
+    background: rgba(245, 158, 11, 0.08);
+    color: var(--accent-orange);
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all var(--transition);
+    white-space: nowrap;
+}
+.yum-btn-reset:hover {
+    background: rgba(245, 158, 11, 0.18);
+    border-color: rgba(245, 158, 11, 0.45);
+    box-shadow: 0 0 10px rgba(245, 158, 11, 0.1);
+}
+.yum-btn-reset:active { transform: scale(0.96); }
+
+.yum-btn-clear-all {
+    padding: 5px 12px;
+    border-radius: 7px;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--accent-red);
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all var(--transition);
+    white-space: nowrap;
+}
+.yum-btn-clear-all:hover {
+    background: rgba(239, 68, 68, 0.2);
+    border-color: rgba(239, 68, 68, 0.5);
+    box-shadow: 0 0 10px rgba(239, 68, 68, 0.1);
+}
+.yum-btn-clear-all:active { transform: scale(0.96); }
+
+.yum-sets-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.yum-set {
+    background: rgba(8, 14, 28, 0.5);
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    padding: 14px;
+    transition: border-color var(--transition), box-shadow var(--transition);
+}
+.yum-set:hover {
+    border-color: rgba(80, 140, 255, 0.15);
+    box-shadow: 0 0 12px rgba(80, 140, 255, 0.04);
+}
+.yum-set-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+.yum-set-num {
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--accent-orange);
+}
+.yum-set-clips {
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    background: rgba(80, 140, 255, 0.1);
+    color: var(--accent-bright);
+    font-weight: 500;
+}
+
+.yum-set-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.yum-set-row {
+    display: flex;
+    gap: 6px;
+}
+.yum-set-row .yum-input { flex: 1; }
+
+.yum-charcount {
+    text-align: right;
+    font-size: 10px;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+.yum-clip-actions {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+}
+.yum-clip-btn {
+    padding: 6px 10px;
+    border-radius: 7px;
+    border: 1px solid var(--border-subtle);
+    background: rgba(8, 14, 28, 0.5);
+    color: var(--text-secondary);
+    font-size: 11px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all var(--transition);
+}
+.yum-clip-btn:hover {
+    border-color: var(--accent-blue);
+    background: rgba(80, 140, 255, 0.1);
+    color: var(--text-primary);
+}
+.yum-clip-btn.danger { color: var(--accent-red); border-color: rgba(239, 68, 68, 0.2); }
+.yum-clip-btn.danger:hover { background: rgba(239, 68, 68, 0.1); }
+.yum-clip-btn.warn { color: var(--accent-orange); border-color: rgba(245, 158, 11, 0.2); }
+.yum-clip-btn.warn:hover { background: rgba(245, 158, 11, 0.1); }
+
+.yum-clip-list { margin-top: 6px; }
+.yum-clip-item {
+    display: flex;
+    align-items: center;
+    padding: 5px 8px;
+    border-radius: 6px;
+    background: rgba(80, 140, 255, 0.04);
+    margin-bottom: 3px;
+    font-size: 11px;
+    gap: 6px;
+}
+.yum-clip-name {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--text-secondary);
+}
+.yum-clip-status { font-size: 10px; }
+.yum-clip-status.done { color: var(--accent-green); }
+.yum-clip-status.wait { color: var(--text-muted); }
+.yum-clip-rm {
+    width: 18px; height: 18px;
+    border: none; background: none;
+    color: var(--accent-red);
+    font-size: 11px;
+    cursor: pointer;
+    opacity: 0.5;
+    transition: opacity var(--transition);
+}
+.yum-clip-rm:hover { opacity: 1; }
+
+.yum-note {
+    font-size: 11px;
+    color: var(--text-muted);
+    line-height: 1.5;
+}
+.yum-warn {
+    font-size: 11px;
+    color: var(--accent-orange);
+    line-height: 1.5;
+    margin-top: 2px;
+}
+.yum-tip-box {
+    background: rgba(80, 140, 255, 0.04);
+    border: 1px solid rgba(80, 140, 255, 0.1);
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin-top: 8px;
+}
+.yum-tip-box p {
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-bottom: 3px;
+    line-height: 1.5;
+}
+.yum-tip-box p:last-child { margin-bottom: 0; }
+
+.yum-status-log {
+    max-height: 200px;
+    overflow-y: auto;
+    font-size: 11px;
+    color: var(--text-secondary);
+    line-height: 1.8;
+}
+
+.yum-schedule-panel {
+    margin-top: 2px;
+}
+
+.yum-btn-ai {
+    width: 100%;
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(167, 139, 250, 0.25);
+    background: linear-gradient(135deg, rgba(124, 58, 237, 0.2), rgba(167, 139, 250, 0.15));
+    color: #c4b5fd;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all var(--transition);
+    position: relative;
+    overflow: hidden;
+}
+.yum-btn-ai:hover {
+    background: linear-gradient(135deg, rgba(124, 58, 237, 0.35), rgba(167, 139, 250, 0.25));
+    border-color: rgba(167, 139, 250, 0.45);
+    color: #ddd6fe;
+    box-shadow: 0 0 18px rgba(124, 58, 237, 0.15);
+    transform: translateY(-1px);
+}
+.yum-btn-ai:active { transform: scale(0.98); }
+.yum-btn-ai.loading {
+    pointer-events: none;
+    opacity: 0.7;
+}
+.yum-btn-ai.loading::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 200%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(167,139,250,0.15), transparent);
+    animation: yum-ai-shimmer 1.5s infinite;
+}
+@keyframes yum-ai-shimmer {
+    0% { transform: translateX(-50%); }
+    100% { transform: translateX(50%); }
+}
+
+.yum-ai-status {
+    margin-top: 6px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: rgba(124, 58, 237, 0.08);
+    border: 1px solid rgba(167, 139, 250, 0.15);
+    font-size: 11px;
+    color: var(--accent-purple);
+    line-height: 1.6;
+}
+.yum-ai-status.error {
+    background: rgba(239, 68, 68, 0.08);
+    border-color: rgba(239, 68, 68, 0.2);
+    color: var(--accent-red);
+}
+.yum-ai-status.success {
+    background: rgba(34, 197, 94, 0.08);
+    border-color: rgba(34, 197, 94, 0.2);
+    color: var(--accent-green);
+}
+
+.yum-product-selector {
+    margin-bottom: 6px;
+}
+.yum-product-select-btn {
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1px solid rgba(80, 140, 255, 0.12);
+    background: linear-gradient(135deg, rgba(80, 140, 255, 0.06), rgba(124, 58, 237, 0.04));
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all var(--transition);
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.yum-product-select-btn:hover {
+    background: linear-gradient(135deg, rgba(80, 140, 255, 0.12), rgba(124, 58, 237, 0.08));
+    border-color: rgba(80, 140, 255, 0.3);
+    color: var(--text-primary);
+    box-shadow: 0 0 12px rgba(80, 140, 255, 0.06);
+    transform: translateY(-1px);
+}
+.yum-product-select-btn:active {
+    transform: scale(0.99);
+}
+.yum-product-select-btn.has-product {
+    border-color: rgba(34, 197, 94, 0.25);
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.08), rgba(34, 197, 94, 0.04));
+    color: var(--accent-green);
+    font-weight: 600;
+}
+
+.yum-product-dropdown {
+    position: relative;
+    margin-top: 4px;
+}
+.yum-product-search {
+    width: 100%;
+    padding: 7px 10px;
+    border-radius: 8px;
+    border: 1px solid rgba(80, 140, 255, 0.2);
+    background: var(--bg-input);
+    color: var(--text-primary);
+    font-size: 11px;
+    font-family: inherit;
+    margin-bottom: 4px;
+}
+.yum-product-search:focus {
+    outline: none;
+    border-color: var(--border-focus);
+}
+.yum-product-search::placeholder { color: var(--text-muted); }
+
+.yum-product-list {
+    max-height: 180px;
+    overflow-y: auto;
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    background: rgba(8, 14, 28, 0.95);
+}
+.yum-product-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    cursor: pointer;
+    transition: background var(--transition);
+    border-bottom: 1px solid rgba(80, 140, 255, 0.04);
+}
+.yum-product-option:last-child { border-bottom: none; }
+.yum-product-option:hover {
+    background: rgba(80, 140, 255, 0.08);
+}
+.yum-product-option img {
+    width: 32px; height: 32px;
+    border-radius: 6px;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+.yum-product-option-icon {
+    width: 32px; height: 32px;
+    border-radius: 6px;
+    background: rgba(80, 140, 255, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+.yum-product-option-info {
+    flex: 1;
+    min-width: 0;
+}
+.yum-product-option-name {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.yum-product-option-id {
+    font-size: 9px;
+    color: var(--text-muted);
+    margin-top: 1px;
+}
+.yum-product-empty {
+    padding: 16px;
+    text-align: center;
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.hidden { display: none !important; }
+
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.15); border-radius: 2px; }
+
+.yum-confirm-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(6px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 99999;
+    padding: 24px;
+    animation: yumFadeIn 0.2s ease-out;
+}
+@keyframes yumFadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes yumSlideUp { from { opacity: 0; transform: translateY(16px) scale(0.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
+.yum-confirm-box {
+    width: 100%; max-width: 320px;
+    background: linear-gradient(135deg, rgba(12, 18, 38, 0.96) 0%, rgba(16, 24, 48, 0.94) 100%);
+    border: 1px solid rgba(80, 140, 255, 0.12);
+    border-radius: 18px; padding: 28px 24px 22px;
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(80, 140, 255, 0.06);
+    text-align: center; animation: yumSlideUp 0.25s ease-out;
+    position: relative; overflow: hidden;
+}
+.yum-confirm-box::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(80, 140, 255, 0.2), transparent);
+}
+.yum-confirm-icon { font-size: 36px; margin-bottom: 12px; display: block; }
+.yum-confirm-title { font-size: 15px; font-weight: 700; color: rgba(255,255,255,0.95); margin-bottom: 6px; }
+.yum-confirm-msg { font-size: 13px; color: rgba(255,255,255,0.55); margin-bottom: 20px; line-height: 1.4; }
+.yum-confirm-btns { display: flex; gap: 10px; }
+.yum-confirm-btns button {
+    flex: 1; padding: 11px 16px; font-size: 13px; font-weight: 600; font-family: inherit;
+    border-radius: 12px; cursor: pointer; transition: all 0.2s ease; border: none;
+}
+.yum-confirm-cancel {
+    background: rgba(80,140,255,0.08); border: 1px solid rgba(80,140,255,0.15) !important;
+    color: rgba(255,255,255,0.7);
+}
+.yum-confirm-cancel:hover { background: rgba(80,140,255,0.15); color: rgba(255,255,255,0.9); }
+.yum-confirm-ok { background: linear-gradient(135deg, #508cff, #6366f1); color: #fff; box-shadow: 0 4px 16px rgba(80,140,255,0.3); }
+.yum-confirm-ok:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(80,140,255,0.4); }
+.yum-confirm-ok.danger { background: linear-gradient(135deg, #ef4444, #dc2626); box-shadow: 0 4px 16px rgba(239,68,68,0.3); }
+.yum-confirm-ok.danger:hover { box-shadow: 0 6px 24px rgba(239,68,68,0.4); }

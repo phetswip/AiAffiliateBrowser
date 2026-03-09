@@ -1,0 +1,290 @@
+<!-- © 2026 YumYum Thailand Co., Ltd. PROTECTED. Do NOT reverse engineer. -->
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AUTO ULTRA — YUMYUM</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="popup.css">
+    <link rel="stylesheet" href="license-gate.css">
+</head>
+
+<body>
+    
+    <div id="license-gate" style="display:none;">
+        <div class="license-card">
+            
+            <div class="license-glow license-glow-1"></div>
+            <div class="license-glow license-glow-2"></div>
+            <div class="license-glow license-glow-3"></div>
+
+            
+            <div class="license-logo-wrap">
+                <img src="assets/icon-128.png" alt="YumYum" class="license-logo" />
+            </div>
+
+            
+            <h1 class="license-brand">YUMYUM</h1>
+            <p class="license-subtitle">AUTO ULTRA</p>
+            <p class="license-subtitle-th">ระบบยำคลิปอัตโนมัติ</p>
+
+            
+            <div class="license-divider"></div>
+
+            
+            <label class="license-label" for="license-key-input">🔑 License Key</label>
+            <input type="text" id="license-key-input" class="license-input" placeholder="YUM-XXXX-XXXX-XXXX"
+                maxlength="18" autocomplete="off" spellcheck="false" />
+
+            
+            <label class="license-device-name-label" for="license-device-name">💻 ตั้งชื่ออุปกรณ์ (optional)</label>
+            <div>
+                <input type="text" id="license-device-name" class="license-device-name-input"
+                    placeholder="เช่น MacBook Pro บ้าน, PC ออฟฟิศ..." maxlength="50" autocomplete="off"
+                    spellcheck="false" />
+            </div>
+
+            
+            <div id="license-error" class="license-error" style="display:none;"></div>
+
+            
+            <button id="license-activate-btn" class="license-btn-activate">
+                ✨ เปิดใช้งาน
+            </button>
+
+            
+            <button id="license-transfer-btn" class="license-btn-transfer" style="display:none;">
+                🔄 ย้ายสิทธิ์มาเครื่องนี้
+            </button>
+
+            
+            <div id="device-manager" style="display:none;">
+                <div class="device-manager-header">
+                    <span>🔒 อุปกรณ์ที่ใช้งาน Key นี้</span>
+                    <span id="device-count-badge" class="device-count-badge"></span>
+                </div>
+                <div id="device-list" class="device-list">
+                    
+                </div>
+                <button id="device-activate-btn" class="license-btn-activate" style="display:none;">
+                    ✨ เปิดใช้งานบนเครื่องนี้
+                </button>
+                <button id="device-back-btn" class="device-back-btn">
+                    ← กลับ
+                </button>
+            </div>
+
+            
+            <div id="license-status" class="license-status"></div>
+
+            
+            <div class="license-footer">
+                <span class="license-footer-powered">POWERED BY</span>
+                <span class="license-footer-brand">YUMYUM Thailand</span>
+                <span class="license-copyright">© 2026 All rights reserved.</span>
+            </div>
+        </div>
+    </div>
+
+    
+    <div id="app-root" style="display:none;">
+
+        
+        <header class="brand-header">
+            <div class="brand-left">
+                <img src="assets/icon-128.png" alt="Logo" class="brand-logo">
+                <div>
+                    <h1 class="brand-title">YUMYUM</h1>
+                    <span class="brand-version">v1.0 • AUTO ULTRA</span>
+                </div>
+            </div>
+            <div class="header-right">
+                <span id="yum-license-badge" class="yum-badge loading">⏳</span>
+                <button id="settingsBtn" class="btn-icon" title="Settings">⚙️</button>
+            </div>
+        </header>
+
+        
+        <div class="tab-bar">
+            <button class="tab-btn active" data-tab="products">📦 ดึงสินค้า</button>
+            <button class="tab-btn" data-tab="ultra">⚡ AUTO ULTRA</button>
+            <button class="tab-btn" data-tab="autopost">🎬 โพสต์คลิป</button>
+            <button class="tab-btn" data-tab="comment">💬 ตอบเม้นส์</button>
+        </div>
+
+        
+        <div id="tab-products" class="tab-content active">
+            
+            <div class="glass-card">
+                <div class="step-header">
+                    <span class="step-badge">1</span>
+                    <h3>เพิ่มสินค้า</h3>
+                </div>
+                <div class="form-group">
+                    <label>ชื่อสินค้า</label>
+                    <input type="text" id="manualProductName" placeholder="พิมพ์ชื่อสินค้า...">
+                </div>
+                <div class="form-group">
+                    <label>คำอธิบาย (optional)</label>
+                    <textarea id="manualProductDesc" rows="2" placeholder="รายละเอียดสินค้า..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>รูปสินค้า (optional)</label>
+                    <div id="imageDropZone" class="image-drop-zone">
+                        <input type="file" id="manualProductImageFile" accept="image/*" style="display:none;">
+                        <div id="imageDropContent" class="image-drop-content">
+                            <span class="image-drop-icon">📷</span>
+                            <span class="image-drop-text">คลิกหรือลากรูปมาวาง</span>
+                        </div>
+                        <div id="imagePreviewWrap" class="image-preview-wrap hidden">
+                            <img id="imagePreview" class="image-preview" alt="preview">
+                            <button id="removeImageBtn" class="image-remove-btn" type="button">✕</button>
+                        </div>
+                    </div>
+                </div>
+                <button id="addManualProductBtn" class="btn-secondary">➕ เพิ่มสินค้า</button>
+            </div>
+
+            
+            <div class="glass-card">
+                <div class="step-header">
+                    <span class="step-badge">2</span>
+                    <h3>ดึงจาก Link</h3>
+                </div>
+                <div class="form-group">
+                    <label>วาง URL สินค้า TikTok <span style="font-size:10px;color:var(--text-muted);">(หลาย Link
+                            แยกบรรทัด)</span></label>
+                    <textarea id="scrapeUrl" rows="4"
+                        placeholder="วาง Link ทีละบรรทัด เช่น&#10;https://vt.tiktok.com/ZS91xxx/&#10;https://vt.tiktok.com/ZS92xxx/&#10;https://vt.tiktok.com/ZS93xxx/"
+                        style="resize:vertical;min-height:60px;"></textarea>
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px;">
+                        <span id="linkCount" style="font-size:10px;color:var(--text-muted);">0 Link</span>
+                        <span id="linkQueueStatus"
+                            style="font-size:10px;color:var(--accent-bright);display:none;"></span>
+                    </div>
+                </div>
+                <button id="scrapeFromLinkBtn" class="btn-secondary">🔗 ดึงข้อมูลจาก Link</button>
+                <div id="scrapeStatus" class="status-text hidden"></div>
+            </div>
+
+            
+            <div class="glass-card">
+                <div class="step-header">
+                    <span class="step-badge">3</span>
+                    <h3>⚡ ดึงจาก Showcase (API)</h3>
+                </div>
+                <p style="font-size:11px;color:var(--text-muted);margin-bottom:10px;">
+                    🚀 ดึงสินค้าจาก Showcase ผ่าน API โดยตรง — <strong>ดึงรูปได้ครบทุกมุม</strong><br>
+                    📌 แค่เปิดแท็บ <a href="https://www.tiktok.com/tiktokstudio/" target="_blank"
+                        style="color:var(--accent-bright);">TikTok Studio</a> ล็อกอินทิ้งไว้ แล้วกดปุ่มด้านล่าง
+                </p>
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+                    <label style="font-size:12px;white-space:nowrap;">จำนวนหน้า:</label>
+                    <button id="showcasePageMinus" class="btn-ghost"
+                        style="width:28px;height:28px;border-radius:50%;padding:0;font-size:14px;line-height:1;border:1px solid var(--border-subtle);">−</button>
+                    <span id="showcaseMaxPagesDisplay"
+                        style="min-width:30px;text-align:center;font-weight:700;font-size:14px;color:var(--accent-bright);">5</span>
+                    <button id="showcasePagePlus" class="btn-ghost"
+                        style="width:28px;height:28px;border-radius:50%;padding:0;font-size:14px;line-height:1;border:1px solid var(--border-subtle);">+</button>
+                    <span style="font-size:10px;color:var(--text-muted);">(0 = ทั้งหมด)</span>
+                    <input type="hidden" id="showcaseMaxPages" value="5">
+                </div>
+                <div class="form-group" style="margin-bottom:10px;">
+                    <label style="font-size:11px;">🔍 ค้นหาสินค้า (optional)</label>
+                    <input type="text" id="showcaseSearchFilter" placeholder="กรองชื่อสินค้า เช่น เสื้อ, กระเป๋า...">
+                </div>
+                <button id="scrapeShowcaseBtn" class="btn-secondary">🛒 ดึงสินค้าจาก Showcase</button>
+                <div id="showcaseStatus" class="status-text hidden" style="margin-top:8px;"></div>
+            </div>
+
+            
+            <div class="glass-card">
+                <div class="step-header">
+                    <span class="step-badge done">✓</span>
+                    <h3>รายการสินค้า (<span id="productCount">0</span>)</h3>
+                </div>
+                <div id="productList" class="product-list">
+                    <div class="empty-state">ยังไม่มีสินค้า — เพิ่มด้านบนหรือดึงจาก Link</div>
+                </div>
+                <button id="clearAllProductsBtn" class="btn-ghost" style="margin-top:8px;">🗑️ ล้างทั้งหมด</button>
+            </div>
+        </div>
+
+        
+        <div id="tab-ultra" class="tab-content">
+            <iframe id="ultraCutIframe" src="ultra-cut.html"
+                style="width:100%;height:calc(100vh - 120px);border:none;background:#060a14;"></iframe>
+        </div>
+
+        
+        <div id="tab-autopost" class="tab-content">
+            <iframe id="autoPostIframe" src="auto-post.html"
+                style="width:100%;height:calc(100vh - 120px);border:none;background:#060a14;"></iframe>
+        </div>
+
+        
+        <div id="tab-comment" class="tab-content">
+            <iframe id="commentReplyIframe" src="comment-reply.html"
+                style="width:100%;height:calc(100vh - 120px);border:none;background:#060a14;"></iframe>
+        </div>
+
+        
+        <div id="settingsModal" class="modal-overlay hidden">
+            <div class="modal-content glass-card">
+                <div class="modal-header">
+                    <h3>⚙️ ตั้งค่า API Keys</h3>
+                    <button id="closeSettingsBtn"
+                        style="width:32px;height:32px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:rgba(20,30,50,0.6);color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>
+                </div>
+                <div style="font-size:11px;color:var(--text-muted);margin-bottom:12px;line-height:1.6;">
+                    📋 <strong>API ที่ระบบใช้:</strong><br>
+                    • <strong>Gemini API</strong> — สร้างสคริป AI + พากย์เสียง TTS<br>
+                    • <strong>FFmpeg</strong> — ยำคลิป/ตัดต่อ (ทำงาน local ไม่ต้อง API)
+                </div>
+                <div class="form-group">
+                    <label>🔑 Gemini API Key <span class="required">(จำเป็น)</span></label>
+                    <input type="password" id="geminiKeyInput" placeholder="AIza...">
+                    <button class="btn-test" id="testGeminiBtn">🧪 ทดสอบ</button>
+                </div>
+                <button id="saveSettingsBtn" class="btn-primary">💾 บันทึก</button>
+                <div id="settingsSaved" class="status-text hidden" style="color:var(--accent-green);">✅ บันทึกแล้ว!
+                </div>
+
+                
+                <div class="settings-device-section"
+                    style="margin-top:16px;padding-top:14px;border-top:1px solid hsla(217,50%,35%,0.15);">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+                        <span style="font-size:13px;font-weight:600;color:hsla(210,30%,85%,0.9);">🔒
+                            จัดการอุปกรณ์</span>
+                        <span id="settings-device-badge"
+                            style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;background:hsla(217,40%,20%,0.5);color:hsla(210,30%,80%,0.8);border:1px solid hsla(217,50%,35%,0.2);"></span>
+                    </div>
+                    <div id="settings-device-list"
+                        style="display:flex;flex-direction:column;gap:6px;max-height:180px;overflow-y:auto;margin-bottom:8px;">
+                        
+                    </div>
+                    <div id="settings-device-status"
+                        style="font-size:11px;color:hsla(210,20%,60%,0.6);min-height:16px;margin:4px 0;"></div>
+                    <button id="settings-refresh-devices" class="btn-ghost"
+                        style="width:100%;font-size:11px;padding:7px;">🔄 รีเฟรชรายชื่ออุปกรณ์</button>
+                </div>
+            </div>
+        </div>
+
+        <footer class="brand-footer">
+            <span class="footer-powered">POWERED BY</span> <strong>YUMYUM Thailand</strong>
+            <div class="footer-copy">© 2026 All rights reserved.</div>
+        </footer>
+
+    </div>
+
+    
+    <script src="license-gate.js"></script>
+    <script src="popup.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,206 @@
+<!-- © 2026 YumYum Thailand Co., Ltd. PROTECTED. Do NOT reverse engineer. -->
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>โพสต์คลิป — YUMYUM</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="auto-post.css">
+</head>
+<body>
+
+    
+    <div class="yum-card">
+        <div class="yum-card-glow"></div>
+        <div class="yum-step-row">
+            <span class="yum-badge">1</span>
+            <h3>เลือกโหมดโพส</h3>
+            <button id="apResetAllBtn" class="yum-btn-reset" title="รีเซ็ตทั้งหมด">🔄 รีเซ็ต</button>
+        </div>
+        <div class="yum-mode-grid">
+            <label class="yum-mode-card" data-mode="draft">
+                <input type="radio" name="postMode" id="apSaveDraft" value="draft">
+                <div class="yum-mode-icon">📝</div>
+                <div class="yum-mode-label">Save Draft</div>
+                <div class="yum-mode-desc">บันทึกฉบับร่าง</div>
+            </label>
+            <label class="yum-mode-card" data-mode="now">
+                <input type="radio" name="postMode" id="apPostNow" value="now">
+                <div class="yum-mode-icon">⚡</div>
+                <div class="yum-mode-label">โพสทันที</div>
+                <div class="yum-mode-desc">ไม่ตั้งเวลา</div>
+            </label>
+            <label class="yum-mode-card" data-mode="schedule">
+                <input type="radio" name="postMode" id="apSchedule" value="schedule">
+                <div class="yum-mode-icon">📅</div>
+                <div class="yum-mode-label">ตั้งเวลา</div>
+                <div class="yum-mode-desc">กำหนดเวลาโพส</div>
+            </label>
+        </div>
+
+        
+        <div class="yum-schedule-panel hidden" id="apSchedulePanel">
+            <div class="yum-divider"></div>
+            <div class="yum-field">
+                <label>📆 วันที่โพส</label>
+                <div class="yum-inline">
+                    <input type="date" id="apScheduleDate" class="yum-input" style="flex:1;">
+                    <button type="button" id="apDateToday" class="yum-chip yum-chip-blue">วันนี้</button>
+                    <button type="button" id="apDateTomorrow" class="yum-chip yum-chip-purple">พรุ่งนี้</button>
+                </div>
+            </div>
+            <div class="yum-inline" style="gap:12px;">
+                <div class="yum-field" style="flex:1;">
+                    <label>🕐 เวลาเริ่ม</label>
+                    <div class="yum-inline" style="gap:4px;">
+                        <select id="apScheduleHour" class="yum-select">
+                            <option value="00">00</option><option value="01">01</option><option value="02">02</option>
+                            <option value="03">03</option><option value="04">04</option><option value="05">05</option>
+                            <option value="06">06</option><option value="07">07</option><option value="08">08</option>
+                            <option value="09" selected>09</option><option value="10">10</option><option value="11">11</option>
+                            <option value="12">12</option><option value="13">13</option><option value="14">14</option>
+                            <option value="15">15</option><option value="16">16</option><option value="17">17</option>
+                            <option value="18">18</option><option value="19">19</option><option value="20">20</option>
+                            <option value="21">21</option><option value="22">22</option><option value="23">23</option>
+                        </select>
+                        <span class="yum-sep">:</span>
+                        <select id="apScheduleMinute" class="yum-select">
+                            <option value="00" selected>00</option><option value="05">05</option>
+                            <option value="10">10</option><option value="15">15</option>
+                            <option value="20">20</option><option value="25">25</option>
+                            <option value="30">30</option><option value="35">35</option>
+                            <option value="40">40</option><option value="45">45</option>
+                            <option value="50">50</option><option value="55">55</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="yum-field" style="flex:1;">
+                    <label>⏱️ ห่างกัน</label>
+                    <select id="apScheduleInterval" class="yum-select">
+                        <option value="5">5 นาที</option><option value="10">10 นาที</option>
+                        <option value="15">15 นาที</option><option value="20">20 นาที</option>
+                        <option value="30" selected>30 นาที</option><option value="60">1 ชม.</option>
+                        <option value="120">2 ชม.</option><option value="180">3 ชม.</option>
+                        <option value="240">4 ชม.</option><option value="360">6 ชม.</option>
+                    </select>
+                </div>
+            </div>
+            <p class="yum-note">💡 เช่น 09:00 ห่าง 1 ชม. → คลิป1 09:00, คลิป2 10:00</p>
+            <p class="yum-warn">⚠️ TikTok ต้องตั้งล่วงหน้าอย่างน้อย 15 นาที</p>
+        </div>
+    </div>
+
+    
+    <div class="yum-card">
+        <div class="yum-card-glow"></div>
+        <div class="yum-step-row">
+            <span class="yum-badge yum-badge-blue">2</span>
+            <h3>ตัวเลือกเพิ่มเติม</h3>
+        </div>
+        <div class="yum-toggle-list">
+            <label class="yum-toggle-item">
+                <div class="yum-toggle-info">
+                    <span class="yum-toggle-emoji">🚫</span>
+                    <div>
+                        <div class="yum-toggle-title">ไม่ปักตระกร้า</div>
+                        <div class="yum-toggle-desc">โพสวิดีโอเฉยๆ ไม่ใส่ลิงก์สินค้า</div>
+                    </div>
+                </div>
+                <input type="checkbox" id="apNoBasket" class="yum-switch">
+            </label>
+        </div>
+    </div>
+
+    
+    <div class="yum-card">
+        <div class="yum-card-glow"></div>
+        <div class="yum-step-row" style="margin-bottom:8px;">
+            <span class="yum-badge yum-badge-green">3</span>
+            <h3>ชุดสินค้า <span class="yum-sub">(50 ชุด)</span></h3>
+            <div style="margin-left:auto;display:flex;gap:4px;align-items:center;">
+                <button id="apClearAllSetsBtn" class="yum-btn-clear-all" title="ล้างทั้งหมด">🗑️ ล้างทั้งหมด</button>
+                <button id="apExportBtn" class="yum-icon-btn" title="ส่งออก">💾</button>
+                <button id="apImportBtn" class="yum-icon-btn" title="นำเข้า">📂</button>
+                <input type="file" id="apImportFile" accept=".json" hidden>
+            </div>
+        </div>
+
+        
+        <div class="yum-quickfill">
+            <div class="yum-quickfill-title">⚡ ตั้งค่าด่วน</div>
+            <div class="yum-inline" style="gap:6px;">
+                <input type="text" id="apBulkHashtags" placeholder="#แฮชแท็ก (สูงสุด 5)" class="yum-input" style="flex:1;">
+                <button type="button" id="apDistributeHashtags" class="yum-chip yum-chip-blue">กระจาย</button>
+            </div>
+            <div class="yum-inline" style="gap:6px;margin-top:6px;">
+                <input type="text" id="apBulkBasketName" placeholder="🏷️ ชื่อตะกร้ากลาง" maxlength="30" class="yum-input" style="flex:1;">
+                <button type="button" id="apDistributeBasketName" class="yum-chip yum-chip-green">กระจาย</button>
+            </div>
+            <div style="margin-top:8px;">
+                <input type="file" id="apDistributeClipsInput" accept=".mp4,.mov,.webm" multiple hidden>
+                <button type="button" id="apDistributeClipsBtn" class="yum-btn-accent">📁 กระจายคลิปทุกชุด</button>
+                <p class="yum-note" style="margin-top:4px;">💡 เลือกหลายคลิป → กระจายชุดละ 1 คลิป</p>
+            </div>
+            <div style="margin-top:10px;">
+                <button type="button" id="apAiGenerateBtn" class="yum-btn-ai">
+                    🤖 AI สร้าง Hashtag + ชื่อตระกร้า
+                </button>
+                <div id="apAiStatus" class="yum-ai-status hidden"></div>
+                <p class="yum-note" style="margin-top:4px;">✨ AI อ่านชื่อสินค้าแต่ละชุด → คิด 5 Hashtag + CTA ชื่อตระกร้าให้อัตโนมัติ</p>
+            </div>
+        </div>
+
+        
+        <div id="apProductSets" class="yum-sets-container"></div>
+
+        
+        <button id="apToggleMoreSets" class="yum-btn-ghost">
+            ▼ ดูเพิ่มเติม (ชุด 3-50)
+        </button>
+    </div>
+
+    
+    <div class="yum-card">
+        <div class="yum-card-glow"></div>
+        <div class="yum-step-row">
+            <span class="yum-badge yum-badge-purple">4</span>
+            <h3>ระยะห่าง & เริ่มโพส</h3>
+        </div>
+        <div class="yum-field">
+            <label>⏳ ระยะห่างแต่ละโพส</label>
+            <select id="apPostInterval" class="yum-select">
+                <option value="3">3 นาที</option>
+                <option value="5" selected>5 นาที</option>
+                <option value="10">10 นาที</option>
+                <option value="15">15 นาที</option>
+                <option value="20">20 นาที</option>
+                <option value="30">30 นาที</option>
+                <option value="60">1 ชั่วโมง</option>
+            </select>
+        </div>
+        <div class="yum-tip-box">
+            <p>💡 วนรอบ: ชุด1→ชุด2→...→ชุด50→ชุด1 จนครบทุกคลิป</p>
+            <p>📝 "ชื่อตะกร้า" จะกรอกใน TikTok ก่อนกด Add</p>
+        </div>
+    </div>
+
+    
+    <button id="apStartBtn" class="yum-btn-start" disabled>
+        🚀 เริ่มโพสคลิป + ปักตระกร้า (<span id="apTotalClips">0</span> คลิป)
+    </button>
+
+    
+    <div id="apStatusArea" class="yum-card hidden">
+        <div class="yum-step-row">
+            <span class="yum-badge">📊</span>
+            <h3>สถานะการทำงาน</h3>
+        </div>
+        <div id="apStatusLog" class="yum-status-log"></div>
+    </div>
+
+    <script src="auto-post.js"></script>
+</body>
+</html>

@@ -1,0 +1,677 @@
+/* © 2026 YumYum Thailand Co., Ltd. — PROTECTED — Do NOT reverse engineer */
+
+
+#license-gate {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #060a14 0%, #0b1528 35%, #0d1a30 60%, #0a1020 100%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    overflow-y: auto;
+    padding: 20px;
+}
+
+#license-gate.license-visible {
+    opacity: 1;
+}
+
+#license-gate.license-exit {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+#license-gate::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(circle at 20% 30%, hsla(217, 90%, 55%, 0.04) 0%, transparent 60%),
+        radial-gradient(circle at 80% 70%, hsla(280, 70%, 50%, 0.03) 0%, transparent 60%),
+        radial-gradient(circle at 50% 50%, hsla(40, 80%, 50%, 0.02) 0%, transparent 50%);
+    pointer-events: none;
+    animation: licenseBgPulse 10s ease-in-out infinite alternate;
+}
+
+@keyframes licenseBgPulse {
+    0% {
+        opacity: 0.6;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+.license-card {
+    position: relative;
+    width: 360px;
+    max-width: 94vw;
+    padding: 40px 30px 30px;
+    background: linear-gradient(145deg,
+            hsla(222, 40%, 14%, 0.88),
+            hsla(222, 35%, 10%, 0.94));
+    border: 1px solid hsla(217, 60%, 35%, 0.18);
+    border-radius: 28px;
+    backdrop-filter: blur(28px);
+    -webkit-backdrop-filter: blur(28px);
+    box-shadow:
+        0 12px 60px hsla(222, 50%, 5%, 0.7),
+        0 0 0 1px hsla(217, 60%, 45%, 0.06),
+        inset 0 1px 0 hsla(217, 60%, 60%, 0.1);
+    text-align: center;
+    overflow: hidden;
+    transform: translateY(24px) scale(0.96);
+    animation: licenseCardIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    animation-delay: 0.15s;
+}
+
+@keyframes licenseCardIn {
+    to {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+}
+
+.license-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, hsla(217, 80%, 65%, 0.2), hsla(40, 80%, 60%, 0.15), transparent);
+}
+
+.license-glow {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(90px);
+    pointer-events: none;
+}
+
+.license-glow-1 {
+    width: 220px;
+    height: 220px;
+    top: -70px;
+    right: -50px;
+    background: hsla(217, 90%, 55%, 0.14);
+    animation: licenseGlow1 6s ease-in-out infinite alternate;
+}
+
+.license-glow-2 {
+    width: 180px;
+    height: 180px;
+    bottom: -40px;
+    left: -40px;
+    background: hsla(280, 70%, 50%, 0.09);
+    animation: licenseGlow2 8s ease-in-out infinite alternate;
+}
+
+.license-glow-3 {
+    width: 120px;
+    height: 120px;
+    top: 40%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: hsla(40, 80%, 55%, 0.06);
+    animation: licenseGlow3 7s ease-in-out infinite alternate;
+}
+
+@keyframes licenseGlow1 {
+    0% {
+        opacity: 0.5;
+        transform: translate(0, 0);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translate(-20px, 20px);
+    }
+}
+
+@keyframes licenseGlow2 {
+    0% {
+        opacity: 0.3;
+        transform: translate(0, 0);
+    }
+
+    100% {
+        opacity: 0.7;
+        transform: translate(20px, -15px);
+    }
+}
+
+@keyframes licenseGlow3 {
+    0% {
+        opacity: 0.3;
+        transform: translateX(-50%) scale(0.8);
+    }
+
+    100% {
+        opacity: 0.6;
+        transform: translateX(-50%) scale(1.2);
+    }
+}
+
+.license-logo-wrap {
+    margin: 0 auto 18px;
+    width: 80px;
+    height: 80px;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow:
+        0 6px 24px hsla(217, 80%, 50%, 0.18),
+        0 0 0 1px hsla(217, 60%, 60%, 0.12),
+        0 0 40px hsla(217, 80%, 50%, 0.05);
+    background: hsla(222, 30%, 18%, 0.6);
+    padding: 4px;
+    animation: logoFloat 4s ease-in-out infinite;
+}
+
+@keyframes logoFloat {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-4px);
+    }
+}
+
+.license-logo {
+    width: 100%;
+    height: 100%;
+    border-radius: 16px;
+    object-fit: cover;
+}
+
+.license-brand {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    margin: 0 0 2px;
+    background: linear-gradient(135deg, #a8c8ff 0%, #ffffff 30%, #f0d68f 60%, #ffffff 80%, #c0d8ff 100%);
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: licenseBrandShimmer 4s ease-in-out infinite;
+}
+
+@keyframes licenseBrandShimmer {
+
+    0%,
+    100% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+}
+
+.license-subtitle {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    color: hsla(210, 30%, 70%, 0.6);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin: 0 0 4px;
+}
+
+.license-subtitle-th {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 11px;
+    font-weight: 400;
+    color: hsla(40, 50%, 70%, 0.45);
+    letter-spacing: 1px;
+    margin: 0;
+}
+
+.license-divider {
+    width: 60px;
+    height: 2px;
+    margin: 18px auto;
+    background: linear-gradient(90deg,
+            transparent,
+            hsla(217, 80%, 60%, 0.3),
+            hsla(40, 70%, 55%, 0.2),
+            transparent);
+    border-radius: 2px;
+}
+
+.license-label {
+    display: block;
+    text-align: left;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    color: hsla(210, 30%, 75%, 0.8);
+    margin: 0 0 6px 2px;
+    letter-spacing: 0.3px;
+}
+
+.license-input {
+    width: 100%;
+    padding: 13px 16px;
+    font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 2.5px;
+    text-align: center;
+    color: hsla(210, 40%, 90%, 0.95);
+    background: hsla(222, 30%, 12%, 0.7);
+    border: 1.5px solid hsla(217, 50%, 35%, 0.2);
+    border-radius: 12px;
+    outline: none;
+    transition: all 0.25s ease;
+    box-sizing: border-box;
+}
+
+.license-input::placeholder {
+    color: hsla(210, 20%, 50%, 0.35);
+    letter-spacing: 2px;
+    font-weight: 400;
+}
+
+.license-input:focus {
+    border-color: hsla(217, 80%, 55%, 0.5);
+    box-shadow:
+        0 0 0 3px hsla(217, 80%, 55%, 0.08),
+        0 0 20px hsla(217, 80%, 55%, 0.06);
+    background: hsla(222, 30%, 13%, 0.85);
+}
+
+.license-device-name-input {
+    width: 100%;
+    padding: 10px 14px;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+    text-align: left;
+    color: hsla(210, 40%, 90%, 0.95);
+    background: hsla(222, 30%, 12%, 0.7);
+    border: 1.5px solid hsla(217, 50%, 35%, 0.15);
+    border-radius: 10px;
+    outline: none;
+    transition: all 0.25s ease;
+    box-sizing: border-box;
+    margin-top: 10px;
+}
+
+.license-device-name-input::placeholder {
+    color: hsla(210, 20%, 50%, 0.35);
+    font-weight: 400;
+}
+
+.license-device-name-input:focus {
+    border-color: hsla(217, 80%, 55%, 0.4);
+    box-shadow: 0 0 0 3px hsla(217, 80%, 55%, 0.06);
+    background: hsla(222, 30%, 13%, 0.85);
+}
+
+.license-device-name-label {
+    display: block;
+    text-align: left;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    color: hsla(210, 25%, 60%, 0.6);
+    margin: 12px 0 4px 2px;
+}
+
+.license-error {
+    margin: 10px 0 0;
+    padding: 10px 14px;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    color: hsla(0, 80%, 72%, 0.95);
+    background: hsla(0, 50%, 15%, 0.4);
+    border: 1px solid hsla(0, 50%, 40%, 0.2);
+    border-radius: 10px;
+    line-height: 1.5;
+    white-space: pre-line;
+}
+
+.license-shake {
+    animation: licenseShake 0.4s ease;
+}
+
+@keyframes licenseShake {
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    20% {
+        transform: translateX(-8px);
+    }
+
+    40% {
+        transform: translateX(8px);
+    }
+
+    60% {
+        transform: translateX(-4px);
+    }
+
+    80% {
+        transform: translateX(4px);
+    }
+}
+
+.license-btn-activate {
+    width: 100%;
+    padding: 14px 20px;
+    margin: 18px 0 0;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: #fff;
+    background: linear-gradient(135deg,
+            hsl(217, 80%, 55%),
+            hsl(260, 65%, 55%),
+            hsl(217, 75%, 52%));
+    background-size: 200% 100%;
+    border: none;
+    border-radius: 14px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow:
+        0 4px 20px hsla(217, 80%, 50%, 0.25),
+        0 0 30px hsla(260, 65%, 55%, 0.08);
+    animation: activateBtnGlow 3s ease-in-out infinite alternate;
+}
+
+@keyframes activateBtnGlow {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    100% {
+        background-position: 100% 50%;
+    }
+}
+
+.license-btn-activate:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow:
+        0 8px 30px hsla(217, 80%, 50%, 0.35),
+        0 0 40px hsla(260, 65%, 55%, 0.12);
+}
+
+.license-btn-activate:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.license-btn-activate:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+}
+
+.license-btn-activate::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg,
+            transparent,
+            hsla(0, 0%, 100%, 0.18),
+            transparent);
+    transition: left 0.5s ease;
+}
+
+.license-btn-activate:hover:not(:disabled)::after {
+    left: 100%;
+}
+
+.license-btn-transfer {
+    width: 100%;
+    padding: 11px 16px;
+    margin: 10px 0 0;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: hsla(30, 80%, 70%, 0.9);
+    background: hsla(30, 40%, 15%, 0.4);
+    border: 1px solid hsla(30, 50%, 40%, 0.25);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.license-btn-transfer:hover {
+    background: hsla(30, 40%, 18%, 0.6);
+    border-color: hsla(30, 50%, 50%, 0.35);
+}
+
+#device-manager {
+    margin: 14px 0 0;
+    animation: licenseCardIn 0.3s ease forwards;
+}
+
+.device-manager-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: hsla(210, 30%, 82%, 0.9);
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid hsla(217, 60%, 35%, 0.15);
+}
+
+.device-count-badge {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 12px;
+    background: hsla(0, 60%, 40%, 0.3);
+    color: hsla(0, 70%, 72%, 0.9);
+    border: 1px solid hsla(0, 50%, 50%, 0.2);
+}
+
+.device-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 200px;
+    overflow-y: auto;
+    margin-bottom: 12px;
+}
+
+.device-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 11px 14px;
+    background: hsla(222, 30%, 16%, 0.6);
+    border: 1px solid hsla(217, 50%, 30%, 0.15);
+    border-radius: 12px;
+    transition: all 0.2s ease;
+}
+
+.device-card:hover {
+    background: hsla(222, 30%, 18%, 0.7);
+    border-color: hsla(217, 50%, 40%, 0.25);
+}
+
+.device-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+    min-width: 0;
+}
+
+.device-name {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    color: hsla(210, 30%, 87%, 0.9);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.device-date {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 10px;
+    color: hsla(210, 20%, 55%, 0.7);
+}
+
+.device-revoke-btn {
+    flex-shrink: 0;
+    margin-left: 8px;
+    padding: 6px 12px;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    color: hsla(0, 70%, 72%, 0.9);
+    background: hsla(0, 50%, 20%, 0.4);
+    border: 1px solid hsla(0, 50%, 40%, 0.25);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.device-revoke-btn:hover {
+    background: hsla(0, 50%, 25%, 0.6);
+    border-color: hsla(0, 50%, 50%, 0.4);
+    color: hsla(0, 80%, 75%, 1);
+}
+
+.device-revoke-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.device-back-btn {
+    width: 100%;
+    padding: 9px 16px;
+    margin: 6px 0 0;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    color: hsla(210, 20%, 60%, 0.8);
+    background: transparent;
+    border: 1px solid hsla(217, 40%, 30%, 0.2);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.device-back-btn:hover {
+    background: hsla(222, 30%, 16%, 0.4);
+    color: hsla(210, 30%, 75%, 0.9);
+}
+
+.license-spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid hsla(0, 0%, 100%, 0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: licenseSpin 0.6s linear infinite;
+    vertical-align: middle;
+    margin-right: 6px;
+}
+
+@keyframes licenseSpin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.license-status {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 12px;
+    color: hsla(210, 20%, 60%, 0.6);
+    margin: 10px 0 0;
+    min-height: 16px;
+}
+
+.license-footer {
+    margin-top: 24px;
+    padding-top: 18px;
+    border-top: 1px solid hsla(217, 50%, 50%, 0.1);
+}
+
+.license-footer p {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 11.5px;
+    color: hsla(210, 20%, 60%, 0.55);
+    margin: 0 0 4px;
+    line-height: 1.5;
+}
+
+.license-link {
+    color: hsl(217, 80%, 65%);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.license-link:hover {
+    color: hsl(217, 90%, 75%);
+}
+
+.license-footer-powered {
+    display: block;
+    font-size: 9px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: hsla(210, 20%, 50%, 0.4);
+    margin-bottom: 2px;
+}
+
+.license-footer-brand {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    background: linear-gradient(180deg, #ffffff 0%, #a8c8ff 50%, #7aabff 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: 0.5px;
+}
+
+.license-copyright {
+    display: block;
+    font-size: 10px;
+    color: hsla(210, 15%, 50%, 0.35);
+    margin-top: 4px;
+    letter-spacing: 0.5px;
+}
+
+.device-list::-webkit-scrollbar {
+    width: 4px;
+}
+
+.device-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.device-list::-webkit-scrollbar-thumb {
+    background: hsla(217, 50%, 40%, 0.3);
+    border-radius: 4px;
+}

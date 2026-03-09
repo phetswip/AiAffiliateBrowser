@@ -1,0 +1,1562 @@
+<!-- © 2026 YumYum Thailand Co., Ltd. PROTECTED. Do NOT reverse engineer. -->
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AUTO ULTRA — ยำฟุตอัตโนมัติ</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* ================================================================
+       APPLE GLASS PREMIUM THEME — AUTO ULTRA
+       ================================================================ */
+        :root {
+            --bg-deep: #060a14;
+            --bg-card: rgba(12, 18, 35, 0.65);
+            --bg-card-hover: rgba(16, 24, 45, 0.75);
+            --bg-input: rgba(8, 14, 28, 0.85);
+            --border-subtle: rgba(80, 120, 200, 0.08);
+            --border-glow: rgba(80, 140, 255, 0.18);
+            --border-focus: rgba(80, 140, 255, 0.45);
+            --accent: #5b9cf6;
+            --accent-bright: #7db4ff;
+            --accent-dim: #3d7ae0;
+            --accent-orange: #f59e0b;
+            --accent-green: #22c55e;
+            --accent-red: #ef4444;
+            --text-primary: #e8ecf4;
+            --text-secondary: #8494ad;
+            --text-muted: #556078;
+            --shadow-card: 0 2px 20px rgba(0, 0, 0, 0.25), 0 0 40px rgba(60, 120, 220, 0.03);
+            --shadow-glow: 0 0 25px rgba(80, 140, 255, 0.08);
+            --radius-card: 16px;
+            --radius-input: 10px;
+            --radius-pill: 20px;
+            --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-deep);
+            color: var(--text-primary);
+            width: 100%;
+            max-width: 100%;
+            margin: 0;
+            padding: 12px 10px;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+            overflow-wrap: break-word;
+            word-break: break-word;
+        }
+
+        body::before,
+        body::after {
+            content: '';
+            position: fixed;
+            border-radius: 50%;
+            pointer-events: none;
+            filter: blur(80px);
+            z-index: 0;
+        }
+
+        body::before {
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(245, 158, 11, 0.06) 0%, transparent 70%);
+            top: -80px;
+            right: -60px;
+        }
+
+        body::after {
+            width: 250px;
+            height: 250px;
+            background: radial-gradient(circle, rgba(239, 68, 68, 0.04) 0%, transparent 70%);
+            bottom: 100px;
+            left: -60px;
+        }
+
+        #ultraCutContent {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* — Header — */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .page-header h2 {
+            font-size: clamp(16px, 5vw, 22px);
+            font-weight: 700;
+            background: linear-gradient(135deg, #f59e0b 0%, #ef4444 40%, #ec4899 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.5px;
+            white-space: nowrap;
+        }
+
+        .page-header .version-badge {
+            font-size: 10px;
+            font-weight: 500;
+            -webkit-text-fill-color: var(--text-muted);
+            background: rgba(245, 158, 11, 0.08);
+            padding: 3px 10px;
+            border-radius: var(--radius-pill);
+            margin-left: 10px;
+            vertical-align: middle;
+            border: 1px solid var(--border-subtle);
+        }
+
+        /* — Glass Card — */
+        .glass-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(24px) saturate(1.3);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-card);
+            margin-bottom: 14px;
+            overflow: hidden;
+            box-shadow: var(--shadow-card);
+            transition: border-color var(--transition), box-shadow var(--transition);
+            position: relative;
+        }
+
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent 0%, rgba(245, 158, 11, 0.12) 50%, transparent 100%);
+            z-index: 1;
+        }
+
+        .glass-card:hover {
+            border-color: var(--border-glow);
+            box-shadow: var(--shadow-card), var(--shadow-glow);
+        }
+
+        .card-header {
+            padding: 12px 12px;
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.06) 0%, rgba(239, 68, 68, 0.03) 100%);
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+            border-bottom: 1px solid var(--border-subtle);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-body {
+            padding: 12px 12px;
+        }
+
+        /* — Step Badge — */
+        .step-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-orange), var(--accent-red));
+            color: #fff;
+            font-size: 12px;
+            font-weight: 700;
+            margin-right: 8px;
+            flex-shrink: 0;
+        }
+
+        .step-badge.done {
+            background: linear-gradient(135deg, var(--accent-green), #16a34a);
+        }
+
+        /* — Form — */
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 7px;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .hint {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 8px;
+            line-height: 1.6;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 11px 14px;
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-input);
+            background: var(--bg-input);
+            color: var(--text-primary);
+            font-size: 13px;
+            font-family: inherit;
+            transition: all var(--transition);
+        }
+
+        input:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--border-focus);
+            box-shadow: 0 0 0 3px rgba(80, 140, 255, 0.08), 0 0 20px rgba(80, 140, 255, 0.06);
+        }
+
+        select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%238494ad' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 32px;
+        }
+
+        /* — Buttons — */
+        .btn-primary {
+            width: 100%;
+            padding: 14px;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: inherit;
+            background: linear-gradient(135deg, var(--accent-orange) 0%, var(--accent-red) 50%, #ec4899 100%);
+            border: none;
+            border-radius: 14px;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(245, 158, 11, 0.15);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(245, 158, 11, 0.25);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            width: 100%;
+            padding: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            font-family: inherit;
+            background: rgba(80, 140, 255, 0.08);
+            border: 1px solid var(--border-glow);
+            border-radius: 12px;
+            color: var(--accent-bright);
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(80, 140, 255, 0.15);
+            border-color: var(--border-focus);
+        }
+
+        .btn-danger {
+            width: 100%;
+            padding: 14px;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: inherit;
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            border: none;
+            border-radius: 14px;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        .btn-ghost {
+            padding: 7px 16px;
+            font-size: 12px;
+            font-family: inherit;
+            background: rgba(20, 30, 50, 0.6);
+            border: 1px solid var(--border-glow);
+            border-radius: var(--radius-input);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+
+        .btn-ghost:hover {
+            background: rgba(80, 140, 255, 0.08);
+            color: var(--accent-bright);
+        }
+
+        /* — Script Cards — */
+        .script-card {
+            padding: 14px;
+            background: rgba(10, 16, 30, 0.5);
+            border: 2px solid var(--border-subtle);
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all var(--transition);
+            margin-bottom: 10px;
+        }
+
+        .script-card:hover {
+            border-color: var(--border-glow);
+            background: rgba(16, 24, 45, 0.5);
+        }
+
+        .script-card.selected {
+            border-color: var(--accent-orange);
+            background: rgba(245, 158, 11, 0.05);
+            box-shadow: 0 0 20px rgba(245, 158, 11, 0.08);
+        }
+
+        .script-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .script-card-style {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--accent-orange);
+            background: rgba(245, 158, 11, 0.1);
+            padding: 2px 10px;
+            border-radius: 20px;
+        }
+
+        .script-card-text {
+            font-size: 12px;
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        /* — Upload Zone — */
+        .upload-zone {
+            min-height: 120px;
+            border: 2px dashed rgba(245, 158, 11, 0.2);
+            border-radius: var(--radius-card);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            background: rgba(8, 14, 28, 0.5);
+            transition: all var(--transition);
+            padding: 20px;
+        }
+
+        .upload-zone:hover,
+        .upload-zone.dragover {
+            border-color: var(--accent-orange);
+            background: rgba(245, 158, 11, 0.03);
+            box-shadow: 0 0 30px rgba(245, 158, 11, 0.05);
+        }
+
+        .upload-zone-icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+        .upload-zone-text {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* — Video Thumbnail Grid — */
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .video-thumb {
+            position: relative;
+            aspect-ratio: 16/9;
+            border-radius: 10px;
+            overflow: hidden;
+            background: rgba(20, 30, 50, 0.6);
+            border: 1px solid var(--border-subtle);
+        }
+
+        .video-thumb video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .video-thumb .remove-btn {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: rgba(239, 68, 68, 0.8);
+            color: #fff;
+            border: none;
+            font-size: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .video-thumb .duration-badge {
+            position: absolute;
+            bottom: 4px;
+            right: 4px;
+            background: rgba(0, 0, 0, 0.7);
+            color: #fff;
+            font-size: 9px;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        /* — Progress — */
+        .progress-bar-wrap {
+            background: rgba(30, 41, 59, 0.6);
+            border-radius: 10px;
+            height: 8px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-bar {
+            background: linear-gradient(90deg, #f59e0b, #ef4444);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s;
+            border-radius: 10px;
+        }
+
+        /* — Activity Log — */
+        .log-container {
+            min-height: 120px;
+            max-height: 250px;
+            overflow-y: auto;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 11px;
+            line-height: 1.7;
+            background: rgba(4, 8, 18, 0.8);
+            border-radius: 0 0 var(--radius-card) var(--radius-card);
+        }
+
+        .log-entry {
+            padding: 8px 14px;
+            color: var(--text-muted);
+            border-bottom: 1px solid rgba(30, 40, 60, 0.4);
+        }
+
+        .log-entry.success {
+            color: var(--accent-green);
+        }
+
+        .log-entry.error {
+            color: var(--accent-red);
+        }
+
+        .log-entry.warning {
+            color: var(--accent-orange);
+        }
+
+        /* — Output Grid — */
+        .output-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .output-card {
+            background: rgba(10, 16, 30, 0.5);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all var(--transition);
+        }
+
+        .output-card:hover {
+            border-color: var(--accent-orange);
+        }
+
+        .output-card video {
+            width: 100%;
+            aspect-ratio: 9/16;
+            object-fit: cover;
+            background: #000;
+        }
+
+        .output-card-footer {
+            padding: 8px 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        .output-card-footer button {
+            padding: 4px 12px;
+            background: var(--accent-orange);
+            border: none;
+            border-radius: 6px;
+            color: #fff;
+            font-size: 10px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* — Audio Preview — */
+        .audio-preview {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: rgba(10, 16, 30, 0.5);
+            border: 1px solid var(--border-subtle);
+            border-radius: 10px;
+            margin-top: 6px;
+        }
+
+        .audio-preview audio {
+            flex: 1;
+            height: 28px;
+        }
+
+        .audio-preview .voice-label {
+            font-size: 10px;
+            color: var(--text-muted);
+            white-space: nowrap;
+        }
+
+        /* — Animations — */
+        @keyframes fadeSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes subtleGlow {
+
+            0%,
+            100% {
+                box-shadow: 0 0 20px rgba(245, 158, 11, 0.03);
+            }
+
+            50% {
+                box-shadow: 0 0 30px rgba(245, 158, 11, 0.07);
+            }
+        }
+
+        .glass-card {
+            animation: fadeSlideIn 0.45s ease both;
+        }
+
+        .glass-card:nth-child(2) {
+            animation-delay: 0.06s;
+        }
+
+        .glass-card:nth-child(3) {
+            animation-delay: 0.12s;
+        }
+
+        .glass-card:nth-child(4) {
+            animation-delay: 0.18s;
+        }
+
+        .glass-card:nth-child(5) {
+            animation-delay: 0.24s;
+        }
+
+        .btn-primary {
+            animation: subtleGlow 4s ease-in-out infinite;
+        }
+
+        ::-webkit-scrollbar {
+            width: 3px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(245, 158, 11, 0.15);
+            border-radius: 3px;
+        }
+
+        ::selection {
+            background: rgba(245, 158, 11, 0.25);
+            color: #fff;
+        }
+
+        /* — Mode Toggle — */
+        .mode-toggle {
+            display: flex;
+            gap: 0;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border-subtle);
+            background: var(--bg-input);
+        }
+
+        .mode-btn {
+            flex: 1;
+            padding: 10px 4px;
+            font-size: 12px;
+            font-weight: 600;
+            font-family: inherit;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all var(--transition);
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .mode-btn:hover {
+            color: var(--text-secondary);
+            background: rgba(80, 140, 255, 0.05);
+        }
+
+        .mode-btn.active {
+            background: linear-gradient(135deg, var(--accent-orange), var(--accent-red));
+            color: #fff;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 2px 12px rgba(245, 158, 11, 0.2);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* — Product Popup Overlay — */
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding-top: 24px;
+            animation: fadeIn 0.25s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px) scale(0.97);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .popup-content {
+            width: 95%;
+            max-width: 520px;
+            max-height: 88vh;
+            background: linear-gradient(135deg, hsla(222, 50%, 10%, 0.98), hsla(222, 45%, 7%, 0.97));
+            border: 1px solid var(--border-glow);
+            border-radius: 16px;
+            box-shadow: 0 24px 80px rgba(0, 0, 0, 0.6), 0 0 50px rgba(80, 140, 255, 0.06);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            animation: slideUp 0.3s ease;
+        }
+
+        .popup-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-subtle);
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.06), rgba(80, 140, 255, 0.03));
+        }
+
+        .popup-header h3 {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .popup-close {
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            border: 1px solid var(--border-subtle);
+            background: rgba(20, 30, 50, 0.6);
+            color: var(--text-secondary);
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--transition);
+        }
+
+        .popup-close:hover {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--accent-red);
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+
+        .popup-search {
+            padding: 10px 16px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .popup-search input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-input);
+            background: var(--bg-input);
+            color: var(--text-primary);
+            font-size: 13px;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+
+        .popup-search input:focus {
+            border-color: var(--accent-blue);
+            outline: none;
+        }
+
+        .popup-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+            min-height: 150px;
+        }
+
+        /* ——— 2-Column Grid Layout ——— */
+        .popup-product-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .popup-product-card {
+            background: rgba(20, 35, 65, 0.4);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            position: relative;
+        }
+
+        .popup-product-delete-btn {
+            position: absolute;
+            top: 6px;
+            left: 6px;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: rgba(239, 68, 68, 0.85);
+            border: none;
+            color: #fff;
+            font-size: 13px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 5;
+            opacity: 0;
+            transition: opacity 0.2s;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        .popup-product-card:hover .popup-product-delete-btn {
+            opacity: 1;
+        }
+
+        .popup-product-delete-btn:hover {
+            background: rgba(239, 68, 68, 1);
+            transform: scale(1.1);
+        }
+
+        .popup-product-card:hover {
+            background: rgba(30, 50, 90, 0.5);
+            border-color: var(--border-glow);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        .popup-product-card.selected {
+            border-color: var(--accent-orange);
+            background: rgba(245, 158, 11, 0.08);
+            box-shadow: 0 0 20px rgba(245, 158, 11, 0.1);
+        }
+
+        .popup-product-card.selected::after {
+            content: '✓';
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 22px;
+            height: 22px;
+            background: var(--accent-orange);
+            color: #000;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 700;
+            z-index: 2;
+        }
+
+        .popup-product-card-img {
+            width: 100%;
+            aspect-ratio: 1;
+            object-fit: cover;
+            background: rgba(15, 25, 45, 0.6);
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .popup-product-card-placeholder {
+            width: 100%;
+            aspect-ratio: 1;
+            background: linear-gradient(135deg, rgba(20, 35, 60, 0.5), rgba(30, 50, 80, 0.3));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .popup-product-card-body {
+            padding: 10px 12px;
+        }
+
+        .popup-product-card-name {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            line-height: 1.4;
+            min-height: 34px;
+        }
+
+        .popup-product-card-desc {
+            font-size: 10px;
+            color: var(--text-muted);
+            margin-top: 4px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            line-height: 1.3;
+        }
+
+        .popup-product-card-price {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--accent-orange);
+            margin-top: 6px;
+        }
+
+        /* ——— Fetch products button in popup ——— */
+        .popup-fetch-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 14px;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, rgba(80, 140, 255, 0.08), rgba(80, 140, 255, 0.04));
+            border: 1px dashed rgba(80, 140, 255, 0.3);
+            border-radius: 12px;
+            cursor: pointer;
+            color: var(--accent-blue);
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .popup-fetch-btn:hover {
+            background: rgba(80, 140, 255, 0.12);
+            border-color: rgba(80, 140, 255, 0.5);
+        }
+
+        .popup-fetch-btn .icon {
+            font-size: 20px;
+        }
+
+        .popup-empty {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        .popup-empty .icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+
+        /* — Selected Product Display — */
+        .selected-product-display {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            padding: 10px 12px;
+            background: rgba(245, 158, 11, 0.06);
+            border: 1px solid rgba(245, 158, 11, 0.15);
+            border-radius: var(--radius-input);
+            margin-top: 8px;
+            flex-wrap: wrap;
+        }
+
+        .selected-product-display .name {
+            flex: 1;
+            min-width: 0;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--accent-orange);
+            word-break: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .selected-product-display .change-btn {
+            font-size: 11px;
+            color: var(--text-muted);
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-family: inherit;
+            text-decoration: underline;
+            flex-shrink: 0;
+        }
+
+        .selected-product-display .change-btn:hover {
+            color: var(--accent-bright);
+        }
+
+        /* — Batch Queue — */
+        .batch-queue-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .batch-queue-card {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            background: rgba(10, 16, 30, 0.5);
+            border: 1px solid var(--border-subtle);
+            border-radius: 10px;
+            transition: all var(--transition);
+        }
+
+        .batch-queue-card:hover {
+            border-color: var(--border-glow);
+        }
+
+        .batch-queue-card.processing {
+            border-color: rgba(245, 158, 11, 0.4);
+            background: rgba(245, 158, 11, 0.06);
+        }
+
+        .batch-queue-card.done {
+            border-color: rgba(34, 197, 94, 0.3);
+            background: rgba(34, 197, 94, 0.04);
+        }
+
+        .batch-queue-card.error {
+            border-color: rgba(239, 68, 68, 0.3);
+            background: rgba(239, 68, 68, 0.04);
+        }
+
+        .batch-queue-num {
+            width: 22px;
+            height: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: rgba(80, 140, 255, 0.15);
+            color: var(--accent-bright);
+            font-size: 11px;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .batch-queue-card.done .batch-queue-num {
+            background: rgba(34, 197, 94, 0.2);
+            color: var(--accent-green);
+        }
+
+        .batch-queue-card.processing .batch-queue-num {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--accent-orange);
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .batch-queue-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .batch-queue-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .batch-queue-meta {
+            font-size: 10px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .batch-queue-remove {
+            width: 22px;
+            height: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: rgba(239, 68, 68, 0.12);
+            border: none;
+            color: var(--accent-red);
+            font-size: 11px;
+            cursor: pointer;
+            flex-shrink: 0;
+            opacity: 0;
+            transition: all var(--transition);
+        }
+
+        .batch-queue-card:hover .batch-queue-remove {
+            opacity: 1;
+        }
+
+        .batch-queue-remove:hover {
+            background: rgba(239, 68, 68, 0.3);
+        }
+    </style>
+</head>
+
+<body>
+    <div id="ultraCutContent">
+
+        
+        <div class="page-header" style="display:flex;align-items:center;justify-content:space-between;">
+            <h2
+                style="background:linear-gradient(135deg,#60a5fa,#93c5fd,#ffffff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:800;">
+                AUTO ULTRA <span class="version-badge">V.2.0</span></h2>
+            <button id="resetAllBtn" class="btn-ghost" style="font-size:11px;padding:6px 14px;
+                border:1px solid rgba(239,68,68,0.25);color:#f87171;border-radius:8px;"
+                title="รีเซ็ตทุกอย่าง เริ่มต้นใหม่">
+                🔄 รีเซ็ต
+            </button>
+        </div>
+
+        
+        <div class="glass-card" id="step1Card">
+            <div class="card-header">
+                <span><span class="step-badge" id="step1Badge">1</span> เลือกสินค้า</span>
+            </div>
+            <div class="card-body">
+                <button id="openProductPopupBtn" class="btn-secondary" style="margin-bottom:8px;">
+                    📦 เลือกสินค้า
+                </button>
+                <div id="selectedProductArea" class="hidden">
+                    <div class="selected-product-display">
+                        <span class="name" id="selectedProductName"></span>
+                        <button class="change-btn" id="changeProductBtn">เปลี่ยน</button>
+                    </div>
+                </div>
+                <input type="hidden" id="productNameInput">
+                <p class="hint">💡 กดปุ่มเพื่อเลือกสินค้าจากรายการที่นำเข้าแล้ว</p>
+            </div>
+        </div>
+
+        
+        <div id="productPopupOverlay" class="popup-overlay hidden">
+            <div class="popup-content">
+                <div class="popup-header">
+                    <h3>📦 เลือกสินค้า</h3>
+                    <button class="popup-close" id="closeProductPopup">✕</button>
+                </div>
+                <div class="popup-search">
+                    <input type="text" id="productSearchInput" placeholder="🔍 ค้นหาสินค้า...">
+                </div>
+                <div class="popup-list" id="productPopupList">
+                    <div class="popup-empty">
+                        <div class="icon">📦</div>
+                        <div>กำลังโหลดรายการสินค้า...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        
+        <div class="glass-card" id="step2Card">
+            <div class="card-header">
+                <span><span class="step-badge" id="step2Badge">2</span> ตั้งค่าคลิป</span>
+            </div>
+            <div class="card-body">
+                
+                <div class="form-group">
+                    <label>โหมดเสียง</label>
+                    <div class="mode-toggle" id="modeToggle">
+                        <button class="mode-btn active" data-mode="original" id="modeOriginalBtn">
+                            🔊 เสียงต้นฉบับ
+                        </button>
+                        <button class="mode-btn" data-mode="ai_voice" id="modeAiBtn">
+                            🤖 AI พากย์เสียง
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-row" style="flex-wrap:wrap;">
+                    <div class="form-group" style="flex:1;min-width:100px;">
+                        <label>จำนวนคลิปที่ต้องการ</label>
+                        <input type="number" id="outputCountInput" value="10" min="1" max="200"
+                            style="text-align:center;">
+                    </div>
+                    <div class="form-group" style="flex:1;min-width:100px;">
+                        <label>ความยาว/คลิป (วินาที)</label>
+                        <input type="number" id="clipDurationInput" value="30" min="10" max="120"
+                            style="text-align:center;">
+                    </div>
+                    <div class="form-group" style="flex:1;min-width:100px;">
+                        <label>ความยาว Segment (วิ)</label>
+                        <input type="number" id="segmentDurationInput" value="5" min="2" max="15"
+                            style="text-align:center;">
+                    </div>
+                </div>
+
+                <p class="hint">✂️ Segment = ความยาวชิ้นย่อยที่ตัดจากแต่ละคลิป (สั้น = ยำเยอะ, ยาว =
+                    เนื้อหาต่อเนื่อง)</p>
+            </div>
+        </div>
+
+        
+        <div class="glass-card" id="step3Card">
+            <div class="card-header">
+                <span><span class="step-badge" id="step3Badge">3</span> 🤖 AI สร้างสคริป + เจนเสียง</span>
+            </div>
+            <div class="card-body">
+                <div class="form-row" style="flex-wrap:wrap;">
+                    <div class="form-group" style="flex:1;min-width:140px;">
+                        <label>สไตล์บทพูด</label>
+                        <select id="scriptMoodSelect">
+                            <option value="random" selected>🎲 AI สุ่มให้</option>
+                            <option value="viral_roast">🤬 หยาบคายดุดัน</option>
+                            <option value="Friendly">😊 เป็นมิตร</option>
+                            <option value="Enthusiastic">🤩 ตื่นเต้น</option>
+                            <option value="Professional">💼 มืออาชีพ</option>
+                            <option value="Energetic">⚡ มีพลัง</option>
+                            <option value="Calm">☁️ สงบ</option>
+                            <option value="Persuasive">🎯 โน้มน้าว</option>
+                            <option value="Humorous">😂 ตลก</option>
+                            <option value="Dramatic">🎭 ดราม่า</option>
+                            <option value="Casual">🎵 สบายๆ</option>
+                            <option value="Rapper">🎤 แร็พเปอร์</option>
+                            <option value="isan">🌾 อีสาน</option>
+                            <option value="southern">🌊 ใต้</option>
+                            <option value="northern">🏔️ เหนือ</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="flex:1;min-width:100px;">
+                        <label>ภาษา</label>
+                        <select id="scriptLangSelect">
+                            <option value="th" selected>🇹🇭 ไทย</option>
+                            <option value="en">🇺🇸 English</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>เสียงพากย์</label>
+                    <select id="voiceTypeSelect">
+                        <optgroup label="👨 ผู้ชาย">
+                            <option value="male-teen">👦 วัยรุ่น</option>
+                            <option value="male-young">🧑 หนุ่ม</option>
+                            <option value="male-adult" selected>👨 ผู้ใหญ่</option>
+                            <option value="male-deep">🗣️ เสียงทุ้ม</option>
+                            <option value="male-energetic">⚡ กระฉับกระเฉง</option>
+                            <option value="male-calm">☁️ สงบ</option>
+                            <option value="male-presenter">🎙️ พิธีกร</option>
+                            <option value="male-narrator">📖 ผู้บรรยาย</option>
+                        </optgroup>
+                        <optgroup label="👩 ผู้หญิง">
+                            <option value="female-teen">👧 วัยรุ่น</option>
+                            <option value="female-young">👩 สาว</option>
+                            <option value="female-adult">👩‍💼 ผู้ใหญ่</option>
+                            <option value="female-sweet">🍬 หวาน</option>
+                            <option value="female-clear">💎 ใส</option>
+                            <option value="female-energetic">⚡ กระฉับกระเฉง</option>
+                            <option value="female-soft">🌸 นุ่มนวล</option>
+                            <option value="female-presenter">🎙️ พิธีกร</option>
+                        </optgroup>
+                    </select>
+                </div>
+
+                <button id="generateAllBtn" class="btn-secondary" style="margin-top:4px;">
+                    ✨ สร้างสคริป + เจนเสียง (Auto)
+                </button>
+
+                <div id="aiStatus" class="hidden" style="margin-top:10px;font-size:12px;color:var(--accent-orange);">
+                </div>
+
+                
+                <div id="scriptsContainer" class="hidden" style="margin-top:14px;">
+                    <div style="font-size:12px;color:var(--accent-orange);margin-bottom:10px;">📝 สคริปที่สร้าง:
+                    </div>
+                    <div id="scriptsList" style="max-height:200px;overflow-y:auto;"></div>
+                </div>
+
+                
+                <div id="voicesContainer" class="hidden" style="margin-top:12px;max-height:200px;overflow-y:auto;">
+                </div>
+
+                <p class="hint" id="aiHint">🤖 ระบบจะสร้างสคริปและเจนเสียงตามจำนวนคลิปที่ตั้งไว้ (Step 2) อัตโนมัติ
+                </p>
+            </div>
+        </div>
+
+        
+        <div class="glass-card" id="step4Card">
+            <div class="card-header">
+                <span><span class="step-badge" id="step4Badge">4</span> ใส่คลิปต้นแบบ</span>
+                <span id="videoCountBadge" style="font-size:11px;color:var(--text-muted);"></span>
+            </div>
+            <div class="card-body">
+                <div class="upload-zone" id="uploadZone">
+                    <div class="upload-zone-icon">📹</div>
+                    <div class="upload-zone-text">ลากไฟล์วิดีโอมาวาง หรือคลิกเพื่อเลือก</div>
+                    <div class="upload-zone-text" style="margin-top:4px;font-size:10px;">MP4, MOV, WEBM (สูงสุด 50 คลิป
+                        / 50MB ต่อคลิป)</div>
+                </div>
+                <input type="file" id="videoFileInput" accept="video/mp4,video/quicktime,video/webm" multiple hidden>
+                <div id="videoGrid" class="video-grid hidden"></div>
+            </div>
+        </div>
+
+        
+        <div class="glass-card" style="margin-top:10px;" id="folderPickerCard">
+            <div class="card-header">
+                <span><span class="step-badge" id="step5Badge">5</span> เลือกโฟลเดอร์เก็บไฟล์</span>
+            </div>
+            <div class="card-body" style="padding:12px 16px;">
+                <div style="display:flex;align-items:center;gap:10px;">
+                    <button id="pickFolderBtn" class="btn-secondary"
+                        style="flex-shrink:0;padding:8px 16px;font-size:12px;">
+                        📁 เลือกโฟลเดอร์
+                    </button>
+                    <div id="folderDisplay"
+                        style="flex:1;font-size:12px;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+                        ⬇️ จะดาวน์โหลดไปยังโฟลเดอร์ Downloads ปกติ
+                    </div>
+                </div>
+                <p class="hint" style="margin-top:6px;font-size:10px;color:var(--text-muted);">
+                    💡 เลือกโฟลเดอร์เพื่อบันทึกคลิปโดยตรง — ไม่ต้องกดดาวน์โหลดทีละไฟล์
+                </p>
+            </div>
+        </div>
+
+        
+        <div style="display:flex;flex-direction:column;gap:6px;margin-top:6px;">
+            <button id="startUltraCutBtn" class="btn-primary">
+                ⚡ เริ่ม AUTO ULTRA — ยำฟุต!
+            </button>
+            <button id="addToQueueBtn" class="btn-secondary" style="font-size:13px; background: linear-gradient(135deg, rgba(0,212,255,0.15), rgba(80,140,255,0.15)); border-color: rgba(0,212,255,0.4); color: #5ce1ff;"
+                title="เพิ่มเข้าคิว Batch">
+                ➕ เพิ่มเข้าคิว (Batch Mode)
+            </button>
+        </div>
+
+        
+        <button id="stopBtn" class="btn-danger hidden" style="margin-top:8px;">
+            ⏹ หยุด
+        </button>
+
+        
+        <div id="batchQueueSection" class="glass-card hidden" style="margin-top:14px;">
+            <div class="card-header">
+                <span>📋 คิวงาน (<span id="batchQueueCount">0</span>)</span>
+                <button id="clearBatchQueueBtn" class="btn-ghost" style="font-size:11px;">🗑️ ล้างคิว</button>
+            </div>
+            <div class="card-body" style="padding:8px;">
+                <div id="batchQueueList" class="batch-queue-list"></div>
+                <button id="startBatchBtn" class="btn-primary" style="margin-top:10px;">
+                    🚀 เริ่มยำทั้งหมด
+                </button>
+            </div>
+            
+            <div id="batchProgressWrap" class="hidden" style="padding:8px 12px 12px;">
+                <div style="font-size:12px;color:var(--accent-orange);margin-bottom:6px;">
+                    <span id="batchProgressLabel">กำลังประมวลผล...</span>
+                </div>
+                <div class="progress-bar-wrap">
+                    <div id="batchProgressBar" class="progress-bar" style="width:0%;"></div>
+                </div>
+            </div>
+        </div>
+
+        
+        <div id="progressSection" class="glass-card hidden" style="margin-top:14px;">
+            <div class="card-header">
+                <span>⏳ กำลังทำงาน...</span>
+                <span id="progressPercent" style="font-size:12px;color:var(--accent-orange);">0%</span>
+            </div>
+            <div class="card-body">
+                <div id="progressStatus" style="font-size:12px;color:var(--accent-orange);margin-bottom:8px;">
+                    กำลังเตรียมการ...</div>
+                <div class="progress-bar-wrap">
+                    <div id="progressBar" class="progress-bar"></div>
+                </div>
+            </div>
+        </div>
+
+        
+        <div id="outputSection" class="glass-card hidden" style="margin-top:14px;">
+            <div class="card-header">
+                <span>📦 ผลลัพธ์</span>
+                <button id="downloadAllBtn" class="btn-ghost">⬇️ ดาวน์โหลดทั้งหมด</button>
+            </div>
+            <div class="card-body">
+                <div id="outputGrid" class="output-grid"></div>
+            </div>
+        </div>
+
+        
+        <div id="downloadPopupOverlay" class="popup-overlay hidden">
+            <div class="popup-content" style="max-width:480px;display:flex;flex-direction:column;overflow:hidden;">
+
+                
+                <div style="position:relative;padding:28px 24px 20px;text-align:center;
+                    background:linear-gradient(135deg, rgba(34,197,94,0.15) 0%, rgba(80,140,255,0.10) 50%, rgba(168,85,247,0.08) 100%);
+                    border-bottom:1px solid rgba(34,197,94,0.15);">
+                    <div style="font-size:56px;margin-bottom:8px;animation:popIn 0.5s ease-out;">🎉</div>
+                    <h3 style="margin:0 0 4px;font-size:20px;font-weight:800;
+                        background:linear-gradient(135deg,#22c55e,#508cff,#a855f7);
+                        -webkit-background-clip:text;-webkit-text-fill-color:transparent;">
+                        AUTO ULTRA สำเร็จ!
+                    </h3>
+                    <p id="popupWowText" style="margin:0;font-size:12px;color:var(--text-muted);font-weight:500;"></p>
+                    <button class="popup-close" id="closeDownloadPopup"
+                        style="position:absolute;top:12px;right:12px;z-index:10;">✕</button>
+                </div>
+
+                
+                <div style="padding:16px 20px;">
+                    <div id="popupStatsGrid"
+                        style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+                        
+                    </div>
+
+                    
+                    <div id="popupSpeedBar" style="background:linear-gradient(135deg, rgba(34,197,94,0.08), rgba(80,140,255,0.05));
+                        border:1px solid rgba(34,197,94,0.15);border-radius:10px;padding:10px 14px;
+                        text-align:center;margin-bottom:14px;">
+                    </div>
+                </div>
+
+                
+                <div style="padding:0 20px 12px;flex:1;overflow-y:auto;min-height:0;max-height:200px;">
+                    <div id="downloadPopupGrid" class="output-grid"></div>
+                </div>
+
+                
+                <div style="padding:12px 20px 16px;border-top:1px solid var(--border-subtle);
+                    background:linear-gradient(to top, hsla(222,50%,8%,1), hsla(222,50%,8%,0.95));flex-shrink:0;">
+                    <button id="downloadPopupAllBtn" class="btn-primary"
+                        style="font-size:15px;padding:12px;font-weight:700;margin-bottom:8px;">
+                        ⬇️ ดาวน์โหลดทั้งหมดในคลิกเดียว
+                    </button>
+                    <button id="downloadPopupCloseBtn" class="btn-secondary">
+                        ✓ เรียบร้อย — ปิดหน้าต่าง
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <style>
+            @keyframes popIn {
+                0% {
+                    transform: scale(0.3);
+                    opacity: 0;
+                }
+
+                70% {
+                    transform: scale(1.1);
+                }
+
+                100% {
+                    transform: scale(1);
+                    opacity: 1;
+                }
+            }
+
+            @keyframes countUp {
+                0% {
+                    opacity: 0;
+                    transform: translateY(10px);
+                }
+
+                100% {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            .stat-card {
+                background: linear-gradient(135deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01));
+                border: 1px solid rgba(255, 255, 255, 0.06);
+                border-radius: 12px;
+                padding: 12px 14px;
+                text-align: center;
+                animation: countUp 0.4s ease-out both;
+            }
+
+            .stat-card:nth-child(2) {
+                animation-delay: 0.1s;
+            }
+
+            .stat-card:nth-child(3) {
+                animation-delay: 0.2s;
+            }
+
+            .stat-card:nth-child(4) {
+                animation-delay: 0.3s;
+            }
+
+            .stat-card .stat-icon {
+                font-size: 24px;
+                margin-bottom: 4px;
+            }
+
+            .stat-card .stat-value {
+                font-size: 22px;
+                font-weight: 800;
+                margin-bottom: 2px;
+                background: linear-gradient(135deg, #22c55e, #508cff);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+            }
+
+            .stat-card .stat-label {
+                font-size: 10px;
+                color: var(--text-muted);
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                font-weight: 600;
+            }
+        </style>
+
+        
+        <div class="glass-card" style="margin-top:14px;">
+            <div class="card-header">
+                <span>📋 Activity Log</span>
+                <button id="clearLogBtn" class="btn-ghost" style="padding:4px 12px;font-size:10px;">Clear</button>
+            </div>
+            <div class="card-body" style="padding:0;">
+                <div id="logContainer" class="log-container">
+                    <div class="log-entry">รอคำสั่ง...</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    
+    <script src="ultra-cut-ai.js"></script>
+    <script src="ultra-cut-engine.js"></script>
+    <script src="ultra-cut-ui.js"></script>
+</body>
+
+</html>

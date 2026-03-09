@@ -9,6 +9,7 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
@@ -33,14 +34,18 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 /**
  * AiAffiliate Browser — Main Browser Activity
- * Full-featured mobile browser with:
+ * Full-featured mobile browser with Chrome Extension Bridge.
+ *
+ * Features:
  * - Desktop User-Agent (Chrome PC mode)
- * - Custom New Tab Page from assets
- * - Downloads manager
- * - Pull-to-refresh
- * - URL bar with smart search
+ * - Chrome Extension API Bridge (chrome.runtime, storage, tabs, scripting)
+ * - Content script auto-injection by URL pattern
+ * - Background.js engine via hidden WebView
+ * - Downloads, pull-to-refresh, custom NTP
  */
 public class MainActivity extends AppCompatActivity {
+
+    private static final String TAG = "AiBrowser";
 
     private WebView webView;
     private EditText urlBar;
@@ -48,21 +53,45 @@ public class MainActivity extends AppCompatActivity {
     private SwipeRefreshLayout swipeRefresh;
     private ImageButton btnBack, btnMenu;
 
-    // NTP and settings URLs (bundled in assets)
+    // Extension Bridge
+    private ExtensionBridge extensionBridge;
+    private BackgroundEngine backgroundEngine;
+
+    // NTP and settings URLs
     private static final String NTP_URL = "file:///android_asset/custom-pages/new-tab/new-tab.html";
     private static final String SETTINGS_URL = "file:///android_asset/custom-pages/settings/settings.html";
     private static final String EXT_MANAGER_URL = "file:///android_asset/custom-pages/extension-manager/extension-manager.html";
 
     // Desktop User-Agent string
-    private static final String DESKTOP_UA =
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 " +
+    private static final String DESKTOP_UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 " +
             "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
 
     private SharedPreferences prefs;
     private boolean desktopMode = true;
 
+    // ─── Content Script Injection Rules ───
+    // Mirrors manifest.json content_scripts configuration
+    private static final ContentScriptRule[] CONTENT_SCRIPT_RULES = {
+            new ContentScriptRule(
+                    "https://www.tiktok.com/view/product/*",
+                    new String[] { "tiktok-product-content-script.js" }),
+            new ContentScriptRule(
+                    "https://www.fastmoss.com/*",
+                    new String[] { "fastmoss-product-content-script.js" }),
+            new ContentScriptRule(
+                    "https://www.kalodata.com/*",
+                    new String[] { "kalodata-product-content-script.js" }),
+            new ContentScriptRule(
+                    "https://www.tiktok.com/tiktokstudio/*",
+                    new String[] {
+                            "overlay-notification.js",
+                            "tiktok-seller-content-script.js",
+                            "tiktok-comment-bot.js"
+                    })
+    };
+
     @Override
-    @SuppressLint("SetJavaScriptEnabled")
+    @SuppressLint({ "SetJavaScriptEnabled", "JavascriptInterface" })
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -70,10 +99,19 @@ public class MainActivity extends AppCompatActivity {
         prefs = getSharedPreferences("aiaffiliate_prefs", MODE_PRIVATE);
         desktopMode = prefs.getBoolean("desktop_mode", true);
 
+        // Initialize Extension Bridge
+        extensionBridge = new ExtensionBridge(this);
+
         initViews();
         setupWebView();
         setupUrlBar();
         setupMenu();
+
+        // Initialize Background Engine (runs background.js)
+        backgroundEngine = new BackgroundEngine(this, extensionBridge);
+        backgroundEngine.initialize();
+
+        Log.i(TAG, "Extension Bridge + Background Engine initialized ✅");
 
         // Handle incoming URLs from intents
         Intent intent = getIntent();
@@ -106,7 +144,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    @SuppressLint("SetJavaScriptEnabled")
+    @SuppressLint({ "SetJavaScriptEnabled", "JavascriptInterface" })
     private void setupWebView() {
         WebSettings settings = webView.getSettings();
 
@@ -139,10 +177,14 @@ public class MainActivity extends AppCompatActivity {
         CookieManager.getInstance().setAcceptCookie(true);
         CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true);
 
-        // Add native bridge for custom pages
+        // ─── Register Bridges ───
+        // Native bridge for custom pages
         webView.addJavascriptInterface(new NativeBridge(this), "aabNative");
+        // Extension API bridge (chrome.* emulation)
+        webView.addJavascriptInterface(extensionBridge, "aabBridge");
+        extensionBridge.setContentWebView(webView);
 
-        // WebViewClient
+        // ─── WebViewClient with Content Script Injection ───
         webView.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
@@ -176,6 +218,13 @@ public class MainActivity extends AppCompatActivity {
                 progressBar.setVisibility(View.GONE);
                 swipeRefresh.setRefreshing(false);
                 updateUrlBar(url);
+
+                // ─── Content Script Injection ───
+                // Always inject Chrome API shim on non-local pages
+                if (url != null && !url.startsWith("file://") && !url.startsWith("data:")) {
+                    injectChromeShim(view);
+                    injectMatchingContentScripts(view, url);
+                }
             }
         });
 
@@ -191,7 +240,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public boolean onShowFileChooser(WebView webView, ValueCallback<Uri[]> filePathCallback,
-                                             FileChooserParams fileChooserParams) {
+                    FileChooserParams fileChooserParams) {
                 Intent intent = fileChooserParams.createIntent();
                 try {
                     startActivityForResult(intent, 1001);
@@ -206,7 +255,7 @@ public class MainActivity extends AppCompatActivity {
         webView.setDownloadListener(new DownloadListener() {
             @Override
             public void onDownloadStart(String url, String userAgent, String contentDisposition,
-                                        String mimetype, long contentLength) {
+                    String mimetype, long contentLength) {
                 try {
                     DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
                     String filename = URLUtil.guessFileName(url, contentDisposition, mimetype);
@@ -227,6 +276,55 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    // ─── Chrome API Shim Injection ───
+    private void injectChromeShim(WebView view) {
+        extensionBridge.injectAssetScript(view, "extension/chrome-api-shim.js");
+        Log.d(TAG, "Chrome API shim injected ✅");
+    }
+
+    // ─── Content Script URL Pattern Matching & Injection ───
+    private void injectMatchingContentScripts(WebView view, String url) {
+        for (ContentScriptRule rule : CONTENT_SCRIPT_RULES) {
+            if (rule.matches(url)) {
+                Log.i(TAG, "Content scripts matched for: " + url);
+                for (String script : rule.scripts) {
+                    extensionBridge.injectAssetScript(view, "extension/" + script);
+                    Log.d(TAG, "  Injected: " + script);
+                }
+            }
+        }
+    }
+
+    // ─── Content Script Rule (URL pattern matching) ───
+    private static class ContentScriptRule {
+        final String pattern;
+        final String[] scripts;
+        final String regexPattern;
+
+        ContentScriptRule(String matchPattern, String[] scripts) {
+            this.pattern = matchPattern;
+            this.scripts = scripts;
+            // Convert Chrome match pattern to regex
+            // https://developer.chrome.com/docs/extensions/develop/concepts/match-patterns
+            this.regexPattern = matchPattern
+                    .replace(".", "\\.") // Escape dots
+                    .replace("*", ".*") // Wildcard to regex
+                    .replace("://\\.", "://\\.?"); // Handle optional www
+        }
+
+        boolean matches(String url) {
+            if (url == null)
+                return false;
+            try {
+                return url.matches(regexPattern);
+            } catch (Exception e) {
+                // Fallback: simple prefix matching
+                String prefix = pattern.replace("*", "");
+                return url.startsWith(prefix);
+            }
+        }
     }
 
     private void setupUrlBar() {
@@ -257,13 +355,27 @@ public class MainActivity extends AppCompatActivity {
 
             popup.setOnMenuItemClickListener(item -> {
                 switch (item.getItemId()) {
-                    case 1: loadUrl(NTP_URL); return true;
-                    case 2: webView.reload(); return true;
-                    case 3: toggleDesktopMode(); return true;
-                    case 4: loadUrl(EXT_MANAGER_URL); return true;
-                    case 5: loadUrl(SETTINGS_URL); return true;
-                    case 6: shareCurrentUrl(); return true;
-                    case 7: clearBrowsingData(); return true;
+                    case 1:
+                        loadUrl(NTP_URL);
+                        return true;
+                    case 2:
+                        webView.reload();
+                        return true;
+                    case 3:
+                        toggleDesktopMode();
+                        return true;
+                    case 4:
+                        loadUrl(EXT_MANAGER_URL);
+                        return true;
+                    case 5:
+                        loadUrl(SETTINGS_URL);
+                        return true;
+                    case 6:
+                        shareCurrentUrl();
+                        return true;
+                    case 7:
+                        clearBrowsingData();
+                        return true;
                 }
                 return false;
             });
@@ -307,7 +419,7 @@ public class MainActivity extends AppCompatActivity {
             settings.setUserAgentString(DESKTOP_UA);
             Toast.makeText(this, "🖥️ Desktop Mode เปิด", Toast.LENGTH_SHORT).show();
         } else {
-            settings.setUserAgentString(null); // Reset to default mobile UA
+            settings.setUserAgentString(null);
             Toast.makeText(this, "📱 Mobile Mode", Toast.LENGTH_SHORT).show();
         }
         webView.reload();
@@ -372,6 +484,9 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
+        if (backgroundEngine != null) {
+            backgroundEngine.destroy();
+        }
         webView.destroy();
         super.onDestroy();
     }

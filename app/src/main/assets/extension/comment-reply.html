@@ -1,0 +1,677 @@
+<!-- © 2026 YumYum Thailand Co., Ltd. PROTECTED. Do NOT reverse engineer. -->
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ตอบเม้นส์ออโต้</title>
+    <style>
+        /* ---- Reset & Base ---- */
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', sans-serif;
+            background: #0b1120;
+            color: hsl(210, 40%, 96%);
+            padding: 16px;
+            font-size: 13px;
+            line-height: 1.5;
+            overflow-y: auto;
+        }
+
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: hsla(217, 80%, 50%, 0.12);
+            border-radius: 3px;
+        }
+
+        /* ---- Page Header ---- */
+        .page-header {
+            margin-bottom: 16px;
+        }
+
+        .page-header h1 {
+            font-size: 18px;
+            font-weight: 800;
+            margin-bottom: 4px;
+            background: linear-gradient(135deg, #fff 0%, hsl(200, 90%, 75%) 40%, hsl(217, 91%, 65%) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .page-header p {
+            font-size: 12px;
+            color: hsla(210, 25%, 75%, 0.65);
+        }
+
+        /* ---- Stats Row ---- */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
+            margin-bottom: 14px;
+        }
+
+        .stat-box {
+            background: linear-gradient(135deg, hsla(217, 35%, 18%, 0.7), hsla(222, 30%, 14%, 0.6));
+            border: 1px solid hsla(217, 50%, 40%, 0.15);
+            border-radius: 10px;
+            padding: 8px 6px;
+            text-align: center;
+        }
+
+        .stat-num {
+            font-size: 18px;
+            font-weight: 700;
+            color: hsl(217, 91%, 65%);
+        }
+
+        .stat-num.green {
+            color: hsl(142, 76%, 52%);
+        }
+
+        .stat-label {
+            font-size: 9px;
+            color: hsla(210, 25%, 70%, 0.6);
+            margin-top: 2px;
+            letter-spacing: 0.03em;
+        }
+
+        /* ---- Glass Card ---- */
+        .card {
+            background: linear-gradient(135deg, hsla(222, 50%, 9%, 0.95), hsla(222, 45%, 7%, 0.9));
+            border: 1px solid hsla(217, 80%, 50%, 0.1);
+            border-radius: 14px;
+            padding: 14px;
+            margin-bottom: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, hsla(217, 91%, 60%, 0.2), transparent);
+            pointer-events: none;
+        }
+
+        .card-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: hsla(217, 60%, 65%, 0.5);
+            letter-spacing: 0.06em;
+            margin-bottom: 10px;
+        }
+
+        /* ---- Mode Selector ---- */
+        .mode-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+        }
+
+        .mode-btn {
+            background: hsla(222, 35%, 13%, 0.8);
+            border: 1px solid hsla(217, 80%, 50%, 0.12);
+            border-radius: 10px;
+            padding: 8px 4px;
+            cursor: pointer;
+            color: hsla(210, 30%, 75%, 0.8);
+            text-align: center;
+            transition: all 0.22s ease;
+            font-family: inherit;
+            -webkit-appearance: none;
+            appearance: none;
+            outline: none;
+            user-select: none;
+        }
+
+        .mode-btn:hover {
+            border-color: hsla(217, 80%, 50%, 0.25);
+            color: hsl(217, 91%, 70%);
+        }
+
+        .mode-btn.active {
+            background: linear-gradient(135deg, hsla(217, 91%, 55%, 0.25), hsla(200, 80%, 50%, 0.15));
+            border-color: hsla(217, 80%, 60%, 0.3);
+            color: #fff;
+            box-shadow: 0 0 12px hsla(217, 91%, 55%, 0.1);
+        }
+
+        .mode-btn-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            pointer-events: none;
+        }
+
+        .mode-btn-desc {
+            display: block;
+            font-size: 9px;
+            color: hsla(210, 25%, 70%, 0.5);
+            margin-top: 2px;
+            pointer-events: none;
+        }
+
+        .mode-btn.active .mode-btn-desc {
+            color: hsla(210, 25%, 80%, 0.7);
+        }
+
+        /* ---- Input Fields ---- */
+        .input-field {
+            width: 100%;
+            background: hsla(222, 40%, 10%, 0.7);
+            border: 1px solid hsla(217, 80%, 50%, 0.15);
+            border-radius: 8px;
+            color: hsl(210, 40%, 96%);
+            padding: 8px 10px;
+            font-size: 12px;
+            font-family: inherit;
+            outline: none;
+            transition: all 0.2s ease;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        .input-field:focus {
+            border-color: hsla(217, 91%, 60%, 0.4);
+            box-shadow: 0 0 0 3px hsla(217, 91%, 60%, 0.1);
+        }
+
+        .input-field::placeholder {
+            color: hsla(210, 25%, 60%, 0.4);
+        }
+
+        textarea.input-field {
+            resize: vertical;
+            min-height: 60px;
+        }
+
+        /* ---- Message List ---- */
+        .msg-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+
+        .msg-num {
+            width: 20px;
+            height: 20px;
+            border-radius: 6px;
+            background: hsla(217, 60%, 20%, 0.4);
+            color: hsla(217, 60%, 65%, 0.6);
+            font-size: 10px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .msg-hint {
+            font-size: 10px;
+            color: hsla(210, 25%, 60%, 0.45);
+            margin-top: 4px;
+        }
+
+        /* ---- Delay Row ---- */
+        .delay-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .delay-label {
+            font-size: 12px;
+            color: hsla(210, 25%, 75%, 0.7);
+            white-space: nowrap;
+        }
+
+        .delay-input {
+            width: 60px;
+            text-align: center;
+        }
+
+        .delay-tilde {
+            color: hsla(210, 25%, 60%, 0.5);
+            font-size: 14px;
+        }
+
+        .delay-unit {
+            font-size: 11px;
+            color: hsla(210, 25%, 60%, 0.5);
+        }
+
+        .delay-help {
+            font-size: 10px;
+            color: hsla(210, 25%, 60%, 0.45);
+            margin-top: 6px;
+            line-height: 1.6;
+        }
+
+        /* ---- Buttons ---- */
+        .btn-primary {
+            width: 100%;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(135deg, hsl(217, 91%, 55%), hsl(230, 80%, 50%));
+            color: #fff;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 2px 16px hsla(217, 91%, 55%, 0.2);
+            transition: all 0.25s ease;
+            position: relative;
+            overflow: hidden;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 4px 24px hsla(217, 91%, 55%, 0.35);
+            transform: translateY(-1px);
+        }
+
+        @keyframes btn-glow {
+
+            0%,
+            100% {
+                box-shadow: 0 2px 16px hsla(217, 91%, 55%, 0.2);
+            }
+
+            50% {
+                box-shadow: 0 4px 24px hsla(217, 91%, 55%, 0.35);
+            }
+        }
+
+        .btn-primary {
+            animation: btn-glow 2.5s ease-in-out infinite;
+        }
+
+        .btn-primary:hover {
+            animation: none;
+        }
+
+        .btn-danger {
+            width: 100%;
+            padding: 12px 20px;
+            border: 1px solid hsla(0, 60%, 40%, 0.3);
+            border-radius: 12px;
+            background: hsla(0, 40%, 15%, 0.5);
+            color: hsla(0, 60%, 75%, 0.9);
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.25s ease;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        .btn-danger:hover {
+            background: hsla(0, 40%, 18%, 0.7);
+            border-color: hsla(0, 60%, 40%, 0.5);
+        }
+
+        /* ---- Log ---- */
+        .log-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .btn-mini {
+            background: hsla(222, 35%, 15%, 0.6);
+            border: 1px solid hsla(217, 80%, 50%, 0.1);
+            border-radius: 6px;
+            padding: 3px 8px;
+            font-size: 10px;
+            color: hsla(210, 25%, 70%, 0.6);
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.2s ease;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        .btn-mini:hover {
+            border-color: hsla(217, 80%, 50%, 0.3);
+            color: hsl(217, 91%, 70%);
+        }
+
+        .log-container {
+            max-height: 160px;
+            overflow-y: auto;
+            font-size: 11px;
+        }
+
+        .log-entry {
+            padding: 4px 0;
+            border-bottom: 1px solid hsla(217, 30%, 20%, 0.1);
+            color: hsla(210, 25%, 70%, 0.6);
+        }
+
+        .log-entry.success {
+            color: hsl(142, 76%, 52%);
+        }
+
+        .log-entry.error {
+            color: hsl(0, 72%, 65%);
+        }
+
+        .log-entry.info {
+            color: hsl(217, 91%, 65%);
+        }
+
+        .log-time {
+            font-size: 10px;
+            color: hsla(210, 25%, 55%, 0.4);
+            margin-right: 6px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* ---- 24H Mode ---- */
+        .card-24h {
+            background: linear-gradient(135deg, hsla(142, 40%, 9%, 0.95), hsla(160, 35%, 7%, 0.9));
+            border: 1px solid hsla(142, 76%, 52%, 0.15);
+        }
+
+        .card-24h::before {
+            background: linear-gradient(90deg, transparent, hsla(142, 76%, 52%, 0.25), transparent);
+        }
+
+        .card-24h.active-glow {
+            border-color: hsla(142, 76%, 52%, 0.3);
+            box-shadow: 0 0 20px hsla(142, 76%, 52%, 0.08);
+        }
+
+        .toggle-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .toggle-label {
+            font-size: 13px;
+            font-weight: 700;
+            color: hsl(142, 76%, 52%);
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 44px;
+            height: 24px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: hsla(220, 30%, 20%, 0.6);
+            border: 1px solid hsla(217, 50%, 40%, 0.2);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .toggle-switch::before {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: hsla(210, 25%, 60%, 0.5);
+            transition: all 0.3s ease;
+        }
+
+        .toggle-switch:checked {
+            background: hsla(142, 60%, 30%, 0.6);
+            border-color: hsla(142, 76%, 52%, 0.4);
+        }
+
+        .toggle-switch:checked::before {
+            transform: translateX(20px);
+            background: hsl(142, 76%, 52%);
+            box-shadow: 0 0 8px hsla(142, 76%, 52%, 0.4);
+        }
+
+        .schedule-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .schedule-label {
+            font-size: 11px;
+            color: hsla(210, 25%, 75%, 0.7);
+            white-space: nowrap;
+        }
+
+        .schedule-select {
+            flex: 1;
+            background: hsla(222, 40%, 10%, 0.7);
+            border: 1px solid hsla(217, 80%, 50%, 0.15);
+            border-radius: 8px;
+            color: hsl(210, 40%, 96%);
+            padding: 7px 10px;
+            font-size: 12px;
+            font-family: inherit;
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        .status-24h {
+            font-size: 11px;
+            color: hsla(210, 25%, 70%, 0.6);
+            padding: 8px 10px;
+            background: hsla(222, 40%, 10%, 0.5);
+            border-radius: 8px;
+            margin-top: 8px;
+            line-height: 1.6;
+        }
+
+        .status-24h .live-dot {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: hsl(142, 76%, 52%);
+            margin-right: 4px;
+            animation: pulse-dot 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse-dot {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.3;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="page-header">
+        <h1>💬 ตอบคอมเมนต์อัตโนมัติ</h1>
+        <p>ตอบกลับคอมเมนต์ TikTok Studio + กดไลค์อัตโนมัติ</p>
+    </div>
+
+    
+    <div class="stats-row">
+        <div class="stat-box">
+            <div class="stat-num" id="stat-total">0</div>
+            <div class="stat-label">ทั้งหมด</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-num green" id="stat-replied">0</div>
+            <div class="stat-label">ตอบแล้ว</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-num" id="stat-skipped">0</div>
+            <div class="stat-label">ข้าม</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-num" id="stat-status">OFF</div>
+            <div class="stat-label">สถานะ</div>
+        </div>
+    </div>
+
+    
+    <div class="card">
+        <div class="card-title">โหมดตอบกลับ</div>
+        <div class="mode-row" id="mode-row">
+            <button type="button" class="mode-btn active" data-mode="fixed">
+                <span class="mode-btn-label">Fixed</span>
+                <span class="mode-btn-desc">ใช้ข้อความเดียว</span>
+            </button>
+            <button type="button" class="mode-btn" data-mode="random">
+                <span class="mode-btn-label">Random</span>
+                <span class="mode-btn-desc">สุ่มจากรายการ</span>
+            </button>
+            <button type="button" class="mode-btn" data-mode="ai">
+                <span class="mode-btn-label">AI</span>
+                <span class="mode-btn-desc">AI สร้างอัตโนมัติ</span>
+            </button>
+        </div>
+    </div>
+
+    
+    <div class="card" id="panel-messages">
+        <div class="card-title">ข้อความตอบกลับ</div>
+        <div id="msg-list">
+            <div class="msg-row"><span class="msg-num">1</span><input type="text" class="input-field msg-input"
+                    placeholder="เช่น ขอบคุณค่ะ"></div>
+            <div class="msg-row"><span class="msg-num">2</span><input type="text" class="input-field msg-input"
+                    placeholder="เช่น ขอบคุณที่สนับสนุนนะคะ"></div>
+            <div class="msg-row"><span class="msg-num">3</span><input type="text" class="input-field msg-input"
+                    placeholder="เช่น สั่งได้เลยค่ะ กดตะกร้าเลย"></div>
+            <div class="msg-row"><span class="msg-num">4</span><input type="text" class="input-field msg-input"
+                    placeholder="เช่น กดตะกร้าสั่งได้เลยค่ะ"></div>
+            <div class="msg-row"><span class="msg-num">5</span><input type="text" class="input-field msg-input"
+                    placeholder="เช่น ส่งฟรี! สั่งเลยค่ะ"></div>
+        </div>
+        <div class="msg-hint" id="mode-hint">Fixed = ใช้แค่ข้อความ #1</div>
+    </div>
+
+    
+    <div class="card" id="panel-ai" style="display:none;">
+        <div class="card-title">คำสั่ง AI (ใช้ OpenAI API ที่ตั้งค่าไว้)</div>
+        <textarea class="input-field" id="ai-prompt"
+            placeholder="อธิบายวิธีที่ AI ควรตอบ เช่น 'ตอบสั้นๆ เป็นมิตร ขอบคุณลูกค้า และแนะนำให้กดสั่งสินค้า'"
+            rows="3"></textarea>
+        <div class="msg-hint" style="margin-top:6px;">AI จะอ่านคอมเมนต์ของลูกค้าแล้วสร้างข้อความตอบตามคำสั่ง</div>
+    </div>
+
+    
+    <div class="card">
+        <div class="card-title">ตั้งค่าหน่วงเวลา</div>
+        <div class="delay-row">
+            <span class="delay-label">รอระหว่างตอบ:</span>
+            <input type="number" class="input-field delay-input" id="delay-min" value="10" min="5" max="300">
+            <span class="delay-tilde">~</span>
+            <input type="number" class="input-field delay-input" id="delay-max" value="30" min="5" max="300">
+            <span class="delay-unit">วินาที</span>
+        </div>
+        <div class="delay-help">
+            ⏱️ <b>ขั้นต่ำ</b> = รอ<u>อย่างน้อย</u>กี่วินาที ก่อนตอบคอมเมนต์ถัดไป<br>
+            ⏱️ <b>สูงสุด</b> = รอ<u>ไม่เกิน</u>กี่วินาที (ระบบจะสุ่มเวลารอระหว่าง 2 ค่านี้)<br>
+            💡 ค่าแนะนำ: 10~30 วินาที เพื่อให้ดูเป็นธรรมชาติ
+        </div>
+    </div>
+
+    
+    <div class="card card-24h" id="card-24h">
+        <div class="toggle-row">
+            <span class="toggle-label">🔄 โหมด 24 ชั่วโมง</span>
+            <input type="checkbox" class="toggle-switch" id="toggle-24h">
+        </div>
+        <div class="schedule-row">
+            <span class="schedule-label">ตอบทุก:</span>
+            <select class="schedule-select" id="interval-select">
+                <option value="5">5 นาที</option>
+                <option value="10">10 นาที</option>
+                <option value="15" selected>15 นาที</option>
+                <option value="30">30 นาที</option>
+                <option value="60">1 ชั่วโมง</option>
+                <option value="120">2 ชั่วโมง</option>
+            </select>
+        </div>
+        <div class="status-24h" id="status-24h" style="display:none;">
+            <span class="live-dot"></span> กำลังทำงาน...
+        </div>
+        <div style="font-size:10px;color:hsla(210,25%,60%,0.45);margin-top:6px;line-height:1.5;">
+            💡 เปิดแล้วระบบจะเข้าตอบคอมเมนต์อัตโนมัติทุกรอบ<br>
+            ⚡ ทำงานพื้นหลัง — ปิด Side Panel ได้
+        </div>
+    </div>
+
+    
+    <div id="btn-area">
+        <button type="button" class="btn-primary" id="btn-start">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+                <polygon points="5 3 19 12 5 21 5 3" />
+            </svg>
+            เริ่มตอบอัตโนมัติ (ครั้งเดียว)
+        </button>
+        <button type="button" class="btn-danger" id="btn-stop" style="display:none;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+                <rect x="6" y="6" width="12" height="12" rx="1" />
+            </svg>
+            หยุด
+        </button>
+    </div>
+
+    
+    <div class="card" style="margin-top: 10px;">
+        <div class="log-header">
+            <span class="card-title" style="margin-bottom:0;">ประวัติการทำงาน</span>
+            <button type="button" class="btn-mini" id="btn-clear-log">ล้าง</button>
+        </div>
+        <div class="log-container" id="log-container">
+            <div class="log-entry"><span class="log-time"></span>พร้อมใช้งาน กำหนดข้อความแล้วกด เริ่ม</div>
+        </div>
+    </div>
+
+    <script src="comment-reply.js"></script>
+</body>
+
+</html>
